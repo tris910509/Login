@@ -114,4 +114,122 @@ document.addEventListener("keypress", resetTimeout);
 // Mulai timer saat halaman dimuat
 resetTimeout();
 
+//Script untuk Menampilkan Notifikasi
+
+function showAlert(message, type = "success") {
+    const alertMessage = document.getElementById("alertMessage");
+    alertMessage.textContent = message;
+    alertMessage.className = `alert alert-${type}`;
+    alertMessage.style.display = "block";
+
+    setTimeout(() => {
+        alertMessage.style.display = "none";
+    }, 3000);
+}
+
+// Contoh penggunaan:
+// showAlert("Login berhasil!", "success");
+// showAlert("Username atau password salah!", "danger");
+
+
+
+
+//fungsi untuk admin mengelola pengguna di
+function manageUsers() {
+    const users = JSON.parse(localStorage.getItem("users")) || [];
+    const userList = users.map((user, index) => `
+        <tr>
+            <td>${index + 1}</td>
+            <td>${user.username}</td>
+            <td>${user.role}</td>
+            <td>
+                <button class="btn btn-warning btn-sm" onclick="editUser(${index})">Edit</button>
+                <button class="btn btn-danger btn-sm" onclick="deleteUser(${index})">Hapus</button>
+            </td>
+        </tr>
+    `).join("");
+
+    document.getElementById("dashboardContent").innerHTML = `
+        <h1>Kelola Pengguna</h1>
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Username</th>
+                    <th>Role</th>
+                    <th>Aksi</th>
+                </tr>
+            </thead>
+            <tbody>${userList}</tbody>
+        </table>
+    `;
+}
+
+function editUser(index) {
+    alert(`Edit pengguna pada indeks ${index}.`);
+}
+
+function deleteUser(index) {
+    let users = JSON.parse(localStorage.getItem("users")) || [];
+    users.splice(index, 1);
+    localStorage.setItem("users", JSON.stringify(users));
+    manageUsers();
+    showAlert("Pengguna berhasil dihapus!", "success");
+}
+
+
+
+//Kasir dapat menambahkan dan melihat daftar transaksi
+function manageTransactions() {
+    const transactions = JSON.parse(localStorage.getItem("transactions")) || [];
+    const transactionList = transactions.map((trx, index) => `
+        <tr>
+            <td>${index + 1}</td>
+            <td>${trx.item}</td>
+            <td>${trx.amount}</td>
+            <td>${trx.date}</td>
+        </tr>
+    `).join("");
+
+    document.getElementById("dashboardContent").innerHTML = `
+        <h1>Kelola Transaksi</h1>
+        <form id="transactionForm">
+            <div class="mb-3">
+                <label for="item" class="form-label">Nama Barang</label>
+                <input type="text" id="item" class="form-control" required>
+            </div>
+            <div class="mb-3">
+                <label for="amount" class="form-label">Jumlah</label>
+                <input type="number" id="amount" class="form-control" required>
+            </div>
+            <button type="submit" class="btn btn-primary">Tambah Transaksi</button>
+        </form>
+        <table class="table table-striped mt-3">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Nama Barang</th>
+                    <th>Jumlah</th>
+                    <th>Tanggal</th>
+                </tr>
+            </thead>
+            <tbody>${transactionList}</tbody>
+        </table>
+    `;
+
+    document.getElementById("transactionForm").addEventListener("submit", function (e) {
+        e.preventDefault();
+        const item = document.getElementById("item").value;
+        const amount = document.getElementById("amount").value;
+        const date = new Date().toLocaleDateString();
+
+        transactions.push({ item, amount, date });
+        localStorage.setItem("transactions", JSON.stringify(transactions));
+        manageTransactions();
+        showAlert("Transaksi berhasil ditambahkan!", "success");
+    });
+}
+
+
+
 
