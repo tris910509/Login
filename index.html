@@ -59,6 +59,9 @@
                         <button type="submit" class="btn btn-primary">Tambah Produk</button>
                     </form>
 
+                    <!-- List Produk -->
+                    <div id="productListDisplay" class="mt-4"></div>
+
                     <!-- Manajemen Kategori -->
                     <h2>Manajemen Kategori</h2>
                     <div id="categoryList"></div>
@@ -70,6 +73,7 @@
                         </div>
                         <button type="submit" class="btn btn-primary">Tambah Kategori</button>
                     </form>
+                    <div id="categoryListDisplay" class="mt-4"></div>
 
                     <!-- Manajemen Suplier -->
                     <h2>Manajemen Suplier</h2>
@@ -86,6 +90,7 @@
                         </div>
                         <button type="submit" class="btn btn-primary">Tambah Suplier</button>
                     </form>
+                    <div id="supplierListDisplay" class="mt-4"></div>
 
                     <!-- Konfirmasi Pembayaran -->
                     <h2>Konfirmasi Pembayaran</h2>
@@ -98,6 +103,7 @@
                         </div>
                         <button type="submit" class="btn btn-primary">Konfirmasi</button>
                     </form>
+                    <div id="paymentConfirmListDisplay" class="mt-4"></div>
 
                     <!-- Pembayaran -->
                     <h2>Pembayaran</h2>
@@ -110,6 +116,7 @@
                         </div>
                         <button type="submit" class="btn btn-primary">Proses Pembayaran</button>
                     </form>
+                    <div id="paymentListDisplay" class="mt-4"></div>
 
                     <!-- Stok -->
                     <h2>Stok</h2>
@@ -126,6 +133,7 @@
                         </div>
                         <button type="submit" class="btn btn-primary">Update Stok</button>
                     </form>
+                    <div id="stockListDisplay" class="mt-4"></div>
 
                     <!-- Kembalian -->
                     <h2>Kembalian</h2>
@@ -138,6 +146,7 @@
                         </div>
                         <button type="submit" class="btn btn-primary">Simpan Kembalian</button>
                     </form>
+                    <div id="refundListDisplay" class="mt-4"></div>
 
                     <!-- Satuan -->
                     <h2>Satuan</h2>
@@ -150,12 +159,13 @@
                         </div>
                         <button type="submit" class="btn btn-primary">Tambah Satuan</button>
                     </form>
+                    <div id="unitListDisplay" class="mt-4"></div>
                 </div>
 
                 <!-- Hak Akses: Kasir & Operator -->
                 <div id="cashierAccess" class="hidden">
                     <h2>Manajemen Produk</h2>
-                    <div id="productList"></div>
+                    <div id="productListDisplay"></div>
                     <h3>Proses Pembayaran</h3>
                     <form id="paymentForm" class="hidden">
                         <div class="form-group">
@@ -167,9 +177,8 @@
                 </div>
 
                 <div id="operatorAccess" class="hidden">
-                    <!-- Tampilan operator -->
                     <h2>Manajemen Stok</h2>
-                    <div id="stockList"></div>
+                    <div id="stockListDisplay"></div>
                     <h3>Atur Stok Produk</h3>
                     <form id="stockForm" class="hidden">
                         <div class="form-group">
@@ -188,256 +197,183 @@
         </div>
     </div>
 
-    <script>
-        // Simulasi role user berdasarkan ID (contoh role: 1=Admin, 2=Kasir, 3=Operator)
-        const userRole = 1; // Set role ID ini sesuai dengan role pengguna yang dipilih
+<script>
+    // Data simulasi
+    let products = [];
+    let categories = [];
+    let suppliers = [];
+    let payments = [];
+    let stocks = [];
+    let refunds = [];
+    let units = [];
 
-        // Array untuk menyimpan data
-        let products = [];
-        let categories = [];
-        let suppliers = [];
-        let payments = [];
-        let stocks = [];
-        let refunds = [];
-        let units = [];
+    // Fungsi untuk menentukan hak akses berdasarkan role
+    function showAccess(userRole) {
+        document.getElementById('adminAccess').classList.add('hidden');
+        document.getElementById('cashierAccess').classList.add('hidden');
+        document.getElementById('operatorAccess').classList.add('hidden');
 
-        // Fungsi untuk menampilkan data sesuai role
-        function showAccess(role) {
-            if (role === 1) { // Admin
-                document.getElementById('adminAccess').classList.remove('hidden');
-                document.getElementById('cashierAccess').classList.add('hidden');
-                document.getElementById('operatorAccess').classList.add('hidden');
-            } else if (role === 2) { // Kasir
-                document.getElementById('adminAccess').classList.add('hidden');
-                document.getElementById('cashierAccess').classList.remove('hidden');
-                document.getElementById('operatorAccess').classList.add('hidden');
-            } else if (role === 3) { // Operator
-                document.getElementById('adminAccess').classList.add('hidden');
-                document.getElementById('cashierAccess').classList.add('hidden');
-                document.getElementById('operatorAccess').classList.remove('hidden');
-            }
-        }
+        if (userRole === 1) document.getElementById('adminAccess').classList.remove('hidden'); // Admin
+        else if (userRole === 2) document.getElementById('cashierAccess').classList.remove('hidden'); // Kasir
+        else if (userRole === 3) document.getElementById('operatorAccess').classList.remove('hidden'); // Operator
+    }
 
-        // Menampilkan hak akses berdasarkan role
-        showAccess(userRole);
+    // Panggil fungsi untuk hak akses (contoh: role admin)
+    const userRole = 1; // 1 = Admin, 2 = Kasir, 3 = Operator
+    showAccess(userRole);
 
-        // Tambah Produk
-        document.getElementById('productForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            const productName = document.getElementById('productName').value;
-            const productPrice = document.getElementById('productPrice').value;
-
-            if (productName && productPrice) {
-                products.push({ name: productName, price: productPrice });
-                document.getElementById('productName').value = '';
-                document.getElementById('productPrice').value = '';
-                renderProductList();
-                populateSelectOptions();
-            }
-        });
-
-        // Tambah Kategori
-        document.getElementById('categoryForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            const categoryName = document.getElementById('categoryName').value;
-
-            if (categoryName) {
-                categories.push(categoryName);
-                document.getElementById('categoryName').value = '';
-                renderCategoryList();
-                populateSelectOptions();
-            }
-        });
-
-        // Tambah Suplier
-        document.getElementById('supplierForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            const supplierName = document.getElementById('supplierName').value;
-            const supplierContact = document.getElementById('supplierContact').value;
-
-            if (supplierName && supplierContact) {
-                suppliers.push({ name: supplierName, contact: supplierContact });
-                document.getElementById('supplierName').value = '';
-                document.getElementById('supplierContact').value = '';
-                renderSupplierList();
-                populateSelectOptions();
-            }
-        });
-
-        // Tambah Konfirmasi Pembayaran
-        document.getElementById('paymentConfirmForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            const paymentId = document.getElementById('paymentId').value;
-
-            if (paymentId) {
-                payments.push(paymentId);
-                document.getElementById('paymentId').value = '';
-                renderPaymentList();
-            }
-        });
-
-        // Tambah Pembayaran
-        document.getElementById('paymentForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            const totalAmount = document.getElementById('totalAmount').value;
-
-            if (totalAmount) {
-                refunds.push(parseFloat(totalAmount));
-                document.getElementById('totalAmount').value = '';
-                renderRefundList();
-            }
-        });
-
-        // Tambah Stok
-        document.getElementById('stockForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            const productName = document.getElementById('stockProduct').value;
-            const stockQuantity = document.getElementById('stockQuantity').value;
-
-            if (productName && stockQuantity) {
-                stocks.push({ product: productName, quantity: stockQuantity });
-                document.getElementById('stockQuantity').value = '';
-                renderStockList();
-            }
-        });
-
-        // Tambah Satuan
-        document.getElementById('unitForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            const unitName = document.getElementById('unitName').value;
-
-            if (unitName) {
-                units.push(unitName);
-                document.getElementById('unitName').value = '';
-                renderUnitList();
-                populateSelectOptions();
-            }
-        });
-
-        // Fungsi untuk render produk, kategori, suplier, pembayaran, stok, dan satuan
-        function renderProductList() {
-            const productList = document.getElementById('productList');
-            productList.innerHTML = '<ul class="list-group">' + products.map((product, index) => `
-                <li class="list-group-item">
-                    ${product.name} - Rp. ${product.price} 
-                    <button class="btn btn-danger btn-sm float-right" onclick="deleteProduct(${index})">Hapus</button>
-                </li>
-            `).join('') + '</ul>';
-        }
-
-        function renderCategoryList() {
-            const categoryList = document.getElementById('categoryList');
-            categoryList.innerHTML = '<ul class="list-group">' + categories.map((category, index) => `
-                <li class="list-group-item">
-                    ${category} 
-                    <button class="btn btn-danger btn-sm float-right" onclick="deleteCategory(${index})">Hapus</button>
-                </li>
-            `).join('') + '</ul>';
-        }
-
-        function renderSupplierList() {
-            const supplierList = document.getElementById('supplierList');
-            supplierList.innerHTML = '<ul class="list-group">' + suppliers.map((supplier, index) => `
-                <li class="list-group-item">
-                    ${supplier.name} (${supplier.contact}) 
-                    <button class="btn btn-danger btn-sm float-right" onclick="deleteSupplier(${index})">Hapus</button>
-                </li>
-            `).join('') + '</ul>';
-        }
-
-        function renderPaymentList() {
-            const paymentList = document.getElementById('paymentList');
-            paymentList.innerHTML = '<ul class="list-group">' + payments.map((payment, index) => `
-                <li class="list-group-item">
-                    ${payment} 
-                    <button class="btn btn-danger btn-sm float-right" onclick="deletePayment(${index})">Hapus</button>
-                </li>
-            `).join('') + '</ul>';
-        }
-
-        function renderStockList() {
-            const stockList = document.getElementById('stockList');
-            stockList.innerHTML = '<ul class="list-group">' + stocks.map((stock, index) => `
-                <li class="list-group-item">
-                    ${stock.product} - ${stock.quantity} 
-                    <button class="btn btn-danger btn-sm float-right" onclick="deleteStock(${index})">Hapus</button>
-                </li>
-            `).join('') + '</ul>';
-        }
-
-        function renderRefundList() {
-            const refundList = document.getElementById('refundList');
-            refundList.innerHTML = '<ul class="list-group">' + refunds.map((refund, index) => `
-                <li class="list-group-item">
-                    Rp. ${refund} 
-                    <button class="btn btn-danger btn-sm float-right" onclick="deleteRefund(${index})">Hapus</button>
-                </li>
-            `).join('') + '</ul>';
-        }
-
-        function renderUnitList() {
-            const unitList = document.getElementById('unitList');
-            unitList.innerHTML = '<ul class="list-group">' + units.map((unit, index) => `
-                <li class="list-group-item">
-                    ${unit} 
-                    <button class="btn btn-danger btn-sm float-right" onclick="deleteUnit(${index})">Hapus</button>
-                </li>
-            `).join('') + '</ul>';
-        }
-
-        // Fungsi untuk hapus item
-        function deleteProduct(index) {
-            products.splice(index, 1);
+    // Fungsi CRUD Produk
+    document.getElementById('productForm').addEventListener('submit', function (e) {
+        e.preventDefault();
+        const name = document.getElementById('productName').value;
+        const price = document.getElementById('productPrice').value;
+        if (name && price) {
+            products.push({ name, price });
             renderProductList();
+            document.getElementById('productForm').reset();
         }
+    });
 
-        function deleteCategory(index) {
-            categories.splice(index, 1);
+    function renderProductList() {
+        const productList = document.getElementById('productListDisplay');
+        productList.innerHTML = products.map((product, index) => `
+            <div class="d-flex justify-content-between align-items-center border p-2 mb-2">
+                <span>${product.name} - Rp. ${product.price}</span>
+                <div>
+                    <button class="btn btn-warning btn-sm mr-2" onclick="editProduct(${index})">Edit</button>
+                    <button class="btn btn-danger btn-sm" onclick="deleteProduct(${index})">Hapus</button>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    function editProduct(index) {
+        const product = products[index];
+        document.getElementById('productName').value = product.name;
+        document.getElementById('productPrice').value = product.price;
+        deleteProduct(index);
+    }
+
+    function deleteProduct(index) {
+        products.splice(index, 1);
+        renderProductList();
+    }
+
+    // Fungsi CRUD Kategori
+    document.getElementById('categoryForm').addEventListener('submit', function (e) {
+        e.preventDefault();
+        const category = document.getElementById('categoryName').value;
+        if (category) {
+            categories.push(category);
             renderCategoryList();
+            document.getElementById('categoryForm').reset();
         }
+    });
 
-        function deleteSupplier(index) {
-            suppliers.splice(index, 1);
+    function renderCategoryList() {
+        const categoryList = document.getElementById('categoryListDisplay');
+        categoryList.innerHTML = categories.map((category, index) => `
+            <div class="d-flex justify-content-between align-items-center border p-2 mb-2">
+                <span>${category}</span>
+                <button class="btn btn-danger btn-sm" onclick="deleteCategory(${index})">Hapus</button>
+            </div>
+        `).join('');
+    }
+
+    function deleteCategory(index) {
+        categories.splice(index, 1);
+        renderCategoryList();
+    }
+
+    // Fungsi CRUD Suplier
+    document.getElementById('supplierForm').addEventListener('submit', function (e) {
+        e.preventDefault();
+        const name = document.getElementById('supplierName').value;
+        const contact = document.getElementById('supplierContact').value;
+        if (name && contact) {
+            suppliers.push({ name, contact });
             renderSupplierList();
+            document.getElementById('supplierForm').reset();
         }
+    });
 
-        function deletePayment(index) {
-            payments.splice(index, 1);
-            renderPaymentList();
-        }
+    function renderSupplierList() {
+        const supplierList = document.getElementById('supplierListDisplay');
+        supplierList.innerHTML = suppliers.map((supplier, index) => `
+            <div class="d-flex justify-content-between align-items-center border p-2 mb-2">
+                <span>${supplier.name} (${supplier.contact})</span>
+                <button class="btn btn-danger btn-sm" onclick="deleteSupplier(${index})">Hapus</button>
+            </div>
+        `).join('');
+    }
 
-        function deleteStock(index) {
-            stocks.splice(index, 1);
+    function deleteSupplier(index) {
+        suppliers.splice(index, 1);
+        renderSupplierList();
+    }
+
+    // Fungsi CRUD Stok
+    document.getElementById('stockForm').addEventListener('submit', function (e) {
+        e.preventDefault();
+        const product = document.getElementById('stockProduct').value;
+        const quantity = document.getElementById('stockQuantity').value;
+        if (product && quantity) {
+            stocks.push({ product, quantity });
             renderStockList();
+            document.getElementById('stockForm').reset();
         }
+    });
 
-        function deleteRefund(index) {
-            refunds.splice(index, 1);
-            renderRefundList();
-        }
+    function renderStockList() {
+        const stockList = document.getElementById('stockListDisplay');
+        stockList.innerHTML = stocks.map((stock, index) => `
+            <div class="d-flex justify-content-between align-items-center border p-2 mb-2">
+                <span>${stock.product} - ${stock.quantity}</span>
+                <button class="btn btn-danger btn-sm" onclick="deleteStock(${index})">Hapus</button>
+            </div>
+        `).join('');
+    }
 
-        function deleteUnit(index) {
-            units.splice(index, 1);
+    function deleteStock(index) {
+        stocks.splice(index, 1);
+        renderStockList();
+    }
+
+    // Fungsi CRUD Satuan
+    document.getElementById('unitForm').addEventListener('submit', function (e) {
+        e.preventDefault();
+        const unit = document.getElementById('unitName').value;
+        if (unit) {
+            units.push(unit);
             renderUnitList();
+            document.getElementById('unitForm').reset();
         }
+    });
 
-        // Populate Select Options for Stock & Other Dropdowns
-        function populateSelectOptions() {
-            const productSelect = document.getElementById('stockProduct');
-            productSelect.innerHTML = '<option value="">Pilih Produk</option>' + products.map(product => `
-                <option value="${product.name}">${product.name}</option>
-            `).join('');
-        }
+    function renderUnitList() {
+        const unitList = document.getElementById('unitListDisplay');
+        unitList.innerHTML = units.map((unit, index) => `
+            <div class="d-flex justify-content-between align-items-center border p-2 mb-2">
+                <span>${unit}</span>
+                <button class="btn btn-danger btn-sm" onclick="deleteUnit(${index})">Hapus</button>
+            </div>
+        `).join('');
+    }
 
-        // Fungsi logout
-        function logout() {
-            // Redirect ke halaman login atau sesuaikan logic logout
-            window.location.href = 'login.html'; // Contoh: halaman login
-        }
-    </script>
+    function deleteUnit(index) {
+        units.splice(index, 1);
+        renderUnitList();
+    }
 
-    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-</body>
-</html>
+    // Populate dropdown untuk stok
+    function populateSelectOptions() {
+        const productSelect = document.getElementById('stockProduct');
+        productSelect.innerHTML = '<option value="">Pilih Produk</option>' + products.map(product => `
+            <option value="${product.name}">${product.name}</option>
+        `).join('');
+    }
+
+    // Render ulang dropdown setelah tambah produk
+    document.getElementById('productForm').addEventListener('submit', populateSelectOptions);
+</script>
+
