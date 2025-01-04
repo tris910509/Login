@@ -26,17 +26,165 @@
         <div class="row">
             <div class="col-md-3">
                 <div class="list-group">
-                    <a href="#" class="list-group-item list-group-item-action">Overview</a>
-                    <a href="#" class="list-group-item list-group-item-action">Settings</a>
-                    <a href="#" class="list-group-item list-group-item-action">Reports</a>
+                    <a href="#" class="list-group-item list-group-item-action active">Manajemen Produk</a>
+                    <a href="#" class="list-group-item list-group-item-action">Manajemen Kategori</a>
+                    <a href="#" class="list-group-item list-group-item-action">Manajemen Suplier</a>
+                    <a href="#" class="list-group-item list-group-item-action">Konfirmasi Pembayaran</a>
+                    <a href="#" class="list-group-item list-group-item-action">Pembayaran</a>
+                    <a href="#" class="list-group-item list-group-item-action">Laporan</a>
+                    <a href="#" class="list-group-item list-group-item-action">Stok</a>
+                    <a href="#" class="list-group-item list-group-item-action">Kembalian</a>
+                    <a href="#" class="list-group-item list-group-item-action">Satuan</a>
                 </div>
             </div>
             <div class="col-md-9">
                 <h1>Selamat Datang, Admin</h1>
-                <!-- Konten Admin akan tampil di sini -->
+
+                <!-- Manajemen Produk -->
+                <h2>Manajemen Produk</h2>
+                <div id="productList"></div>
+                <h3>Tambah Produk</h3>
+                <form id="productForm">
+                    <div class="form-group">
+                        <label for="productName">Nama Produk</label>
+                        <input type="text" class="form-control" id="productName" placeholder="Masukkan nama produk">
+                    </div>
+                    <div class="form-group">
+                        <label for="productPrice">Harga Produk</label>
+                        <input type="number" class="form-control" id="productPrice" placeholder="Masukkan harga produk">
+                    </div>
+                    <button type="submit" class="btn btn-primary">Tambah Produk</button>
+                </form>
+
+                <!-- Manajemen Kategori -->
+                <h2>Manajemen Kategori</h2>
+                <div id="categoryList"></div>
+                <h3>Tambah Kategori</h3>
+                <form id="categoryForm">
+                    <div class="form-group">
+                        <label for="categoryName">Nama Kategori</label>
+                        <input type="text" class="form-control" id="categoryName" placeholder="Masukkan nama kategori">
+                    </div>
+                    <button type="submit" class="btn btn-primary">Tambah Kategori</button>
+                </form>
+
+                <!-- Manajemen Suplier -->
+                <h2>Manajemen Suplier</h2>
+                <div id="supplierList"></div>
+                <h3>Tambah Suplier</h3>
+                <form id="supplierForm">
+                    <div class="form-group">
+                        <label for="supplierName">Nama Suplier</label>
+                        <input type="text" class="form-control" id="supplierName" placeholder="Masukkan nama suplier">
+                    </div>
+                    <div class="form-group">
+                        <label for="supplierContact">Kontak Suplier</label>
+                        <input type="text" class="form-control" id="supplierContact" placeholder="Masukkan kontak suplier">
+                    </div>
+                    <button type="submit" class="btn btn-primary">Tambah Suplier</button>
+                </form>
+
             </div>
         </div>
     </div>
+
+    <script>
+        // Array untuk menyimpan data
+        let products = [];
+        let categories = [];
+        let suppliers = [];
+
+        // Tambah Produk
+        document.getElementById('productForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const productName = document.getElementById('productName').value;
+            const productPrice = document.getElementById('productPrice').value;
+
+            if (productName && productPrice) {
+                products.push({ name: productName, price: productPrice });
+                document.getElementById('productName').value = '';
+                document.getElementById('productPrice').value = '';
+                renderProductList();
+            }
+        });
+
+        // Tambah Kategori
+        document.getElementById('categoryForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const categoryName = document.getElementById('categoryName').value;
+
+            if (categoryName) {
+                categories.push(categoryName);
+                document.getElementById('categoryName').value = '';
+                renderCategoryList();
+            }
+        });
+
+        // Tambah Suplier
+        document.getElementById('supplierForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const supplierName = document.getElementById('supplierName').value;
+            const supplierContact = document.getElementById('supplierContact').value;
+
+            if (supplierName && supplierContact) {
+                suppliers.push({ name: supplierName, contact: supplierContact });
+                document.getElementById('supplierName').value = '';
+                document.getElementById('supplierContact').value = '';
+                renderSupplierList();
+            }
+        });
+
+        // Render Produk
+        function renderProductList() {
+            const productList = document.getElementById('productList');
+            productList.innerHTML = '<ul class="list-group">' + products.map((product, index) => `
+                <li class="list-group-item">
+                    ${product.name} - Rp. ${product.price} 
+                    <button class="btn btn-danger btn-sm float-right" onclick="deleteProduct(${index})">Hapus</button>
+                </li>
+            `).join('') + '</ul>';
+        }
+
+        // Render Kategori
+        function renderCategoryList() {
+            const categoryList = document.getElementById('categoryList');
+            categoryList.innerHTML = '<ul class="list-group">' + categories.map((category, index) => `
+                <li class="list-group-item">
+                    ${category} 
+                    <button class="btn btn-danger btn-sm float-right" onclick="deleteCategory(${index})">Hapus</button>
+                </li>
+            `).join('') + '</ul>';
+        }
+
+        // Render Suplier
+        function renderSupplierList() {
+            const supplierList = document.getElementById('supplierList');
+            supplierList.innerHTML = '<ul class="list-group">' + suppliers.map((supplier, index) => `
+                <li class="list-group-item">
+                    ${supplier.name} (${supplier.contact}) 
+                    <button class="btn btn-danger btn-sm float-right" onclick="deleteSupplier(${index})">Hapus</button>
+                </li>
+            `).join('') + '</ul>';
+        }
+
+        // Delete Product
+        function deleteProduct(index) {
+            products.splice(index, 1);
+            renderProductList();
+        }
+
+        // Delete Category
+        function deleteCategory(index) {
+            categories.splice(index, 1);
+            renderCategoryList();
+        }
+
+        // Delete Supplier
+        function deleteSupplier(index) {
+            suppliers.splice(index, 1);
+            renderSupplierList();
+        }
+    </script>
 
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
