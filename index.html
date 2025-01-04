@@ -1,374 +1,47 @@
 <!DOCTYPE html>
-<html lang="id">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard Admin</title>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-    <style>
-        .hidden { display: none; }
-        .active { font-weight: bold; color: #007bff; }
-        .notification {
-            background-color: #28a745;
-            color: white;
-            padding: 10px;
-            margin-bottom: 10px;
-            border-radius: 5px;
-        }
-        .table-container { overflow-x: auto; }
-    </style>
+    <title>Login System</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body>
-
-    <!-- Navbar -->
-    <nav class="navbar navbar-expand-lg navbar-light bg-light">
-        <a class="navbar-brand" href="#">Dashboard</a>
-        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse" id="navbarNav">
-            <ul class="navbar-nav ml-auto">
-                <li class="nav-item"><a class="nav-link" href="#">Dashboard</a></li>
-                <li class="nav-item"><a class="nav-link" href="#">Profil</a></li>
-                <li class="nav-item"><a class="nav-link" href="#" onclick="logout()">Logout</a></li>
-            </ul>
-        </div>
-    </nav>
-
-    <!-- Container -->
-    <div class="container mt-4">
-        <div class="row">
-            <!-- Sidebar -->
-            <div class="col-md-3">
-                <div class="list-group" id="menuSidebar">
-                    <a href="#produk" class="list-group-item list-group-item-action" onclick="switchSection('produk', this)">Manajemen Produk</a>
-                    <a href="#kategori" class="list-group-item list-group-item-action" onclick="switchSection('kategori', this)">Manajemen Kategori</a>
-                    <a href="#suplier" class="list-group-item list-group-item-action" onclick="switchSection('suplier', this)">Manajemen Suplier</a>
-                    <a href="#stok" class="list-group-item list-group-item-action" onclick="switchSection('stok', this)">Manajemen Stok</a>
-                    <a href="#satuan" class="list-group-item list-group-item-action" onclick="switchSection('satuan', this)">Manajemen Satuan</a>
-                    <a href="#transaksi" class="list-group-item list-group-item-action" onclick="switchSection('transaksi', this)">Transaksi</a>
-                    <a href="#laporan" class="list-group-item list-group-item-action" onclick="switchSection('laporan', this)">Laporan</a>
+    <div class="container mt-5">
+        <div class="row justify-content-center">
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-header text-center">
+                        <h4>Login</h4>
+                    </div>
+                    <div class="card-body">
+                        <form id="loginForm">
+                            <div class="mb-3">
+                                <label for="username" class="form-label">Username</label>
+                                <input type="text" id="username" class="form-control" placeholder="Enter username" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="password" class="form-label">Password</label>
+                                <input type="password" id="password" class="form-control" placeholder="Enter password" required>
+                            </div>
+                            <button type="submit" class="btn btn-primary w-100">Login</button>
+                        </form>
+                    </div>
                 </div>
             </div>
+        </div>
 
-            <!-- Main Content -->
-            <div class="col-md-9">
-                <!-- Notifikasi -->
-                <div id="notification" class="notification hidden"></div>
-
-                <!-- Template Halaman CRUD -->
-                <div id="crudContainer"></div>
+        <div class="mt-5 text-center">
+            <h5 id="welcomeMessage" style="display: none;"></h5>
+            <div id="restrictedContent" style="display: none;">
+                <button class="btn btn-success" onclick="navigate('admin')">Admin Page</button>
+                <button class="btn btn-warning" onclick="navigate('kasir')">Kasir Page</button>
+                <button class="btn btn-info" onclick="navigate('operator')">Operator Page</button>
+                <button class="btn btn-danger" onclick="logout()">Logout</button>
             </div>
         </div>
     </div>
 
-    <!-- JavaScript -->
-    <script>
-        const sections = {
-            produk: { title: "Manajemen Produk", columns: ["Nama Produk", "Harga", "Stok", "Kategori", "Suplier"], fields: ["name", "price", "stock", "category", "supplier"], data: [] },
-            kategori: { title: "Manajemen Kategori", columns: ["Nama Kategori"], fields: ["name"], data: [] },
-            suplier: { title: "Manajemen Suplier", columns: ["Nama Suplier", "Kontak"], fields: ["name", "contact"], data: [] },
-            stok: { title: "Manajemen Stok", columns: ["Produk", "Jumlah"], fields: ["product", "quantity"], data: [] },
-            satuan: { title: "Manajemen Satuan", columns: ["Nama Satuan"], fields: ["name"], data: [] },
-            transaksi: { title: "Transaksi", columns: ["Produk", "Jumlah", "Subtotal"], fields: ["product", "quantity", "subtotal"], data: [] },
-            laporan: { title: "Laporan Penjualan", columns: ["No", "Tanggal", "Total", "Detail"], data: [] }
-        };
-
-        document.addEventListener("DOMContentLoaded", () => {
-            // Load data from localStorage
-            Object.keys(sections).forEach(sectionId => {
-                const storedData = localStorage.getItem(sectionId);
-                if (storedData) sections[sectionId].data = JSON.parse(storedData);
-            });
-            switchSection('produk', document.querySelector('#menuSidebar a'));
-        });
-
-        function switchSection(sectionId, element) {
-            const section = sections[sectionId];
-            document.querySelectorAll('#menuSidebar a').forEach(menu => menu.classList.remove('active'));
-            element.classList.add('active');
-
-            if (sectionId === "transaksi") {
-                renderTransaksiSection();
-            } else if (sectionId === "laporan") {
-                renderLaporanSection();
-            } else {
-                renderCRUDSection(section);
-            }
-        }
-
-        function renderCRUDSection(section) {
-            document.getElementById("crudContainer").innerHTML = `
-                <h2>${section.title}</h2>
-                <form id="${section.fields.join('')}Form" class="mb-4">
-                    ${section.fields.map(field => `
-                        <div class="form-group">
-                            <label for="${field}">${field.charAt(0).toUpperCase() + field.slice(1)}</label>
-                            <input type="text" id="${field}" class="form-control" placeholder="Masukkan ${field}">
-                        </div>`).join('')}
-                    <button type="submit" class="btn btn-primary">Tambah</button>
-                    <button type="reset" class="btn btn-secondary">Reset</button>
-                </form>
-                <div class="table-container">
-                    <table class="table table-striped">
-                        <thead>
-                            <tr>
-                                <th>#</th>
-                                ${section.columns.map(column => `<th>${column}</th>`).join('')}
-                                <th>Aksi</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            ${renderTableRows(section.data, section.fields)}
-                        </tbody>
-                    </table>
-                </div>
-            `;
-        }
-
-        function renderTableRows(data, fields) {
-            return data.map((item, index) => `
-                <tr>
-                    <td>${index + 1}</td>
-                    ${fields.map(field => `<td>${item[field]}</td>`).join('')}
-                    <td>
-                        <button class="btn btn-warning btn-sm" onclick="editItem('${fields.join('')}', ${index})">Edit</button>
-                        <button class="btn btn-danger btn-sm" onclick="deleteItem('${fields.join('')}', ${index})">Hapus</button>
-                    </td>
-                </tr>
-            `).join('');
-        }
-
-        function editItem(sectionId, index) {
-            const item = sections[sectionId].data[index];
-            sections[sectionId].fields.forEach(field => {
-                document.getElementById(field).value = item[field];
-            });
-            document.querySelector(`#${sectionId}Form`).onsubmit = (event) => {
-                event.preventDefault();
-                updateItem(sectionId, index);
-            };
-        }
-
-        function updateItem(sectionId, index) {
-            const updatedData = {};
-            sections[sectionId].fields.forEach(field => {
-                updatedData[field] = document.getElementById(field).value;
-            });
-            sections[sectionId].data[index] = updatedData;
-            localStorage.setItem(sectionId, JSON.stringify(sections[sectionId].data));
-            showNotification('Data berhasil diperbarui!', 'success');
-            switchSection(sectionId, document.querySelector(`#menuSidebar a[href="#${sectionId}"]`));
-        }
-
-        function deleteItem(sectionId, index) {
-            sections[sectionId].data.splice(index, 1);
-            localStorage.setItem(sectionId, JSON.stringify(sections[sectionId].data));
-            showNotification('Data berhasil dihapus!', 'danger');
-            switchSection(sectionId, document.querySelector(`#menuSidebar a[href="#${sectionId}"]`));
-        }
-
-        function renderTransaksiSection() {
-            const produkOptions = sections.produk.data.map((product, index) => 
-                `<option value="${index}">${product.name} - Rp ${product.price} (${product.stock} stok)</option>`
-            ).join('');
-
-            document.getElementById("crudContainer").innerHTML = `
-                <h2>Transaksi</h2>
-                <form id="transaksiForm" class="mb-4">
-                    <div class="form-group">
-                        <label for="product">Produk</label>
-                        <select id="product" class="form-control">
-                            <option value="">Pilih Produk</option>
-                            ${produkOptions}
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="quantity">Jumlah</label>
-                        <input type="number" id="quantity" class="form-control" placeholder="Masukkan jumlah">
-                    </div>
-                    <button type="submit" class="btn btn-primary">Tambah ke Keranjang</button>
-                </form>
-                <div class="table-container">
-                    <table class="table table-striped">
-                        <thead>
-                            <tr>
-                                <th>#</th>
-                                <th>Produk</th>
-                                <th>Jumlah</th>
-                                <th>Subtotal</th>
-                                <th>Aksi</th>
-                            </tr>
-                        </thead>
-                        <tbody id="cartTableBody">
-                            ${renderCartRows(sections.transaksi.data)}
-                        </tbody>
-                    </table>
-                </div>
-                <div class="mb-4">
-                    <h4>Total: <span id="totalAmount">Rp 0</span></h4>
-                </div>
-                <div class="form-group">
-                    <label for="payment">Pembayaran</label>
-                    <input type="number" id="payment" class="form-control" placeholder="Masukkan jumlah pembayaran">
-                </div>
-                <button class="btn btn-success" onclick="processPayment()">Proses Pembayaran</button>
-            `;
-
-            document.getElementById("transaksiForm").addEventListener("submit", function (event) {
-                event.preventDefault();
-                addToCart();
-            });
-
-            calculateTotal();
-        }
-
-        function addToCart() {
-            const productIndex = document.getElementById("product").value;
-            const quantity = parseInt(document.getElementById("quantity").value);
-            const product = sections.produk.data[productIndex];
-
-            if (!productIndex || quantity <= 0) return alert("Masukkan produk dan jumlah yang valid!");
-            if (quantity > product.stock) return alert("Jumlah melebihi stok!");
-
-            const subtotal = product.price * quantity;
-            sections.transaksi.data.push({ product: product.name, quantity, subtotal });
-            localStorage.setItem("transaksi", JSON.stringify(sections.transaksi.data));
-
-            showNotification('Produk berhasil ditambahkan ke keranjang!', 'success');
-            renderTransaksiSection();
-        }
-
-        function renderCartRows(cartData) {
-            return cartData.map((item, index) => `
-                <tr>
-                    <td>${index + 1}</td>
-                    <td>${item.product}</td>
-                    <td>${item.quantity}</td>
-                    <td>Rp ${item.subtotal}</td>
-                    <td>
-                        <button class="btn btn-danger btn-sm" onclick="removeFromCart(${index})">Hapus</button>
-                    </td>
-                </tr>
-            `).join('');
-        }
-
-        function removeFromCart(index) {
-            sections.transaksi.data.splice(index, 1);
-            localStorage.setItem("transaksi", JSON.stringify(sections.transaksi.data));
-            showNotification('Produk berhasil dihapus dari keranjang!', 'danger');
-            renderTransaksiSection();
-        }
-
-        function calculateTotal() {
-            const total = sections.transaksi.data.reduce((sum, item) => sum + item.subtotal, 0);
-            document.getElementById("totalAmount").textContent = `Rp ${total}`;
-        }
-
-        function processPayment() {
-            const payment = parseFloat(document.getElementById("payment").value);
-            const total = sections.transaksi.data.reduce((sum, item) => sum + item.subtotal, 0);
-
-            if (payment < total) return alert("Jumlah pembayaran kurang dari total transaksi!");
-            
-            const change = payment - total;
-            showNotification(`Pembayaran berhasil! Kembalian: Rp ${change}`, 'success');
-            sections.transaksi.data = [];
-            localStorage.setItem("transaksi", JSON.stringify([]));
-            renderTransaksiSection();
-        }
-
-        function renderLaporanSection() {
-            const laporanRows = sections.transaksi.data.reduce((acc, curr) => {
-                const date = new Date();
-                const laporan = acc.find(lap => lap.date === date.toISOString().split('T')[0]);
-
-                if (laporan) {
-                    laporan.items.push(curr);
-                } else {
-                    acc.push({ date: date.toISOString().split('T')[0], total: curr.subtotal, items: [curr] });
-                }
-
-                return acc;
-            }, []).map((laporan, index) => `
-                <tr>
-                    <td>${index + 1}</td>
-                    <td>${laporan.date}</td>
-                    <td>Rp ${laporan.total}</td>
-                    <td>
-                        <button class="btn btn-info btn-sm" onclick="showLaporanDetail(${index})">Detail</button>
-                    </td>
-                </tr>
-            `).join('');
-
-            document.getElementById("crudContainer").innerHTML = `
-                <h2>Laporan Penjualan</h2>
-                <table class="table table-striped">
-                    <thead>
-                        <tr>
-                            <th>No</th>
-                            <th>Tanggal</th>
-                            <th>Total</th>
-                            <th>Detail</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        ${laporanRows}
-                    </tbody>
-                </table>
-                <div id="laporanDetail" class="hidden"></div>
-            `;
-        }
-
-        function showLaporanDetail(index) {
-            const laporan = sections.transaksi.data[index];
-            const items = laporan.items.map(item => `
-                <tr>
-                    <td>${item.product}</td>
-                    <td>${item.quantity}</td>
-                    <td>Rp ${item.subtotal}</td>
-                </tr>
-            `).join('');
-
-            document.getElementById("laporanDetail").innerHTML = `
-                <h3>Detail Laporan Penjualan</h3>
-                <table class="table table-striped">
-                    <thead>
-                        <tr>
-                            <th>Produk</th>
-                            <th>Jumlah</th>
-                            <th>Subtotal</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        ${items}
-                    </tbody>
-                </table>
-                <button class="btn btn-danger mt-3" onclick="hideLaporanDetail()">Tutup</button>
-            `;
-
-            document.getElementById("laporanDetail").classList.remove('hidden');
-        }
-
-        function hideLaporanDetail() {
-            document.getElementById("laporanDetail").classList.add('hidden');
-        }
-
-        function logout() {
-            alert("Logout berhasil!");
-            // Redirect to login or homepage
-        }
-
-        function showNotification(message, type) {
-            const notification = document.getElementById("notification");
-            notification.classList.remove('hidden', 'alert-success', 'alert-danger');
-            notification.classList.add(`alert-${type}`);
-            notification.textContent = message;
-            setTimeout(() => {
-                notification.classList.add('hidden');
-            }, 3000);
-        }
-    </script>
-
+    <script src="script.js"></script>
 </body>
 </html>
