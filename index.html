@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard Admin - CRUD</title>
+    <title>Dashboard Admin - CRUD dengan Persistensi</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <style>
         .hidden { display: none; }
@@ -72,6 +72,15 @@
         let editingSection = null;
         let editingIndex = null;
 
+        // Load data dari local storage saat halaman dimuat
+        document.addEventListener("DOMContentLoaded", () => {
+            Object.keys(sections).forEach(sectionId => {
+                const storedData = localStorage.getItem(sectionId);
+                if (storedData) sections[sectionId].data = JSON.parse(storedData);
+            });
+            switchSection('produk', document.querySelector('#menuSidebar a'));
+        });
+
         function switchSection(sectionId, element) {
             editingSection = sectionId;
             const section = sections[sectionId];
@@ -103,13 +112,11 @@
                 </div>
             `;
 
-            // Event listener untuk form
             document.getElementById(`${sectionId}Form`).addEventListener("submit", function (event) {
                 event.preventDefault();
                 handleFormSubmit(sectionId);
             });
 
-            // Highlight menu aktif
             document.querySelectorAll('#menuSidebar a').forEach(menu => menu.classList.remove('active'));
             element.classList.add('active');
         }
@@ -130,10 +137,18 @@
         function handleFormSubmit(sectionId) {
             const section = sections[sectionId];
             const data = {};
+            let isValid = true;
 
             section.fields.forEach(field => {
-                data[field] = document.getElementById(field).value;
+                const value = document.getElementById(field).value.trim();
+                if (!value) isValid = false;
+                data[field] = value;
             });
+
+            if (!isValid) {
+                showNotification("Semua field harus diisi!", "danger");
+                return;
+            }
 
             if (editingIndex !== null) {
                 section.data[editingIndex] = data;
@@ -145,6 +160,7 @@
                 showNotification(`${section.title} berhasil ditambahkan!`);
             }
 
+            saveDataToLocalStorage(sectionId, section.data);
             switchSection(sectionId, document.querySelector(`#menuSidebar a[href="#${sectionId}"]`));
         }
 
@@ -163,23 +179,22 @@
         function deleteItem(index) {
             const section = sections[editingSection];
             section.data.splice(index, 1);
+            saveDataToLocalStorage(editingSection, section.data);
             showNotification(`${section.title} berhasil dihapus!`);
             switchSection(editingSection, document.querySelector(`#menuSidebar a[href="#${editingSection}"]`));
         }
 
-        function showNotification(message) {
+        function saveDataToLocalStorage(sectionId, data) {
+            localStorage.setItem(sectionId, JSON.stringify(data));
+        }
+
+        function showNotification(message, type = "success") {
             const notification = document.getElementById('notification');
             notification.innerText = message;
+            notification.style.backgroundColor = type === "success" ? "#28a745" : "#dc3545";
             notification.classList.remove('hidden');
             setTimeout(() => notification.classList.add('hidden'), 3000);
         }
-
-        // Default ke halaman produk
-        switchSection('produk', document.querySelector('#menuSidebar a'));
     </script>
-
-    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 </body>
 </html>
