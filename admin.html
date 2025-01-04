@@ -26,5 +26,94 @@
             window.location.href = "index.html";
         }
     </script>
+    <script>
+        function manageUsers() {
+    const users = loadFromLocalStorage("users");
+    const userRows = users
+        .map(
+            (user, index) => `
+        <tr>
+            <td>${index + 1}</td>
+            <td>${user.username}</td>
+            <td>${user.role}</td>
+            <td>
+                <button class="btn btn-warning btn-sm" onclick="editUser(${index})">Edit</button>
+                <button class="btn btn-danger btn-sm" onclick="deleteUser(${index})">Hapus</button>
+            </td>
+        </tr>`
+        )
+        .join("");
+
+    document.getElementById("dashboardContent").innerHTML = `
+        <h2>Manajemen Pengguna</h2>
+        <form id="addUserForm" class="mb-3">
+            <div class="input-group">
+                <input type="text" id="newUsername" class="form-control" placeholder="Username" required>
+                <input type="password" id="newPassword" class="form-control" placeholder="Password" required>
+                <select id="newRole" class="form-select">
+                    <option value="admin">Admin</option>
+                    <option value="kasir">Kasir</option>
+                    <option value="operator">Operator</option>
+                </select>
+                <button type="submit" class="btn btn-primary">Tambah</button>
+            </div>
+        </form>
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>No</th>
+                    <th>Username</th>
+                    <th>Role</th>
+                    <th>Aksi</th>
+                </tr>
+            </thead>
+            <tbody>${userRows}</tbody>
+        </table>
+    `;
+
+    document.getElementById("addUserForm").addEventListener("submit", function (e) {
+        e.preventDefault();
+        const username = document.getElementById("newUsername").value.trim();
+        const password = document.getElementById("newPassword").value;
+        const role = document.getElementById("newRole").value;
+
+        if (users.some((u) => u.username === username)) {
+            showAlert("Username sudah ada!", "danger");
+            return;
+        }
+
+        users.push({ username, password, role });
+        saveToLocalStorage("users", users);
+        manageUsers();
+        showAlert("Pengguna berhasil ditambahkan!", "success");
+    });
+}
+
+function editUser(index) {
+    const users = loadFromLocalStorage("users");
+    const user = users[index];
+
+    const newUsername = prompt("Masukkan username baru:", user.username);
+    const newRole = prompt("Masukkan role baru (admin/kasir/operator):", user.role);
+
+    if (newUsername && newRole) {
+        users[index] = { ...user, username: newUsername, role: newRole };
+        saveToLocalStorage("users", users);
+        manageUsers();
+        showAlert("Pengguna berhasil diperbarui!", "success");
+    }
+}
+
+function deleteUser(index) {
+    const users = loadFromLocalStorage("users");
+    if (confirm("Yakin ingin menghapus pengguna ini?")) {
+        users.splice(index, 1);
+        saveToLocalStorage("users", users);
+        manageUsers();
+        showAlert("Pengguna berhasil dihapus!", "success");
+    }
+}
+
+    </script>
 </body>
 </html>
