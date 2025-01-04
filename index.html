@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Halaman Admin</title>
+    <title>Dashboard Admin</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <style>
         .hidden { display: none; }
@@ -11,14 +11,14 @@
 </head>
 <body>
     <nav class="navbar navbar-expand-lg navbar-light bg-light">
-        <a class="navbar-brand" href="#">Admin Dashboard</a>
+        <a class="navbar-brand" href="#">Dashboard</a>
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav ml-auto">
                 <li class="nav-item"><a class="nav-link" href="#">Dashboard</a></li>
-                <li class="nav-item"><a class="nav-link" href="#">Profile</a></li>
+                <li class="nav-item"><a class="nav-link" href="#">Profil</a></li>
                 <li class="nav-item"><a class="nav-link" href="#" onclick="logout()">Logout</a></li>
             </ul>
         </div>
@@ -28,174 +28,114 @@
         <div class="row">
             <div class="col-md-3">
                 <div class="list-group">
-                    <a href="#" class="list-group-item list-group-item-action active">Manajemen Produk</a>
-                    <a href="#" class="list-group-item list-group-item-action">Manajemen Kategori</a>
-                    <a href="#" class="list-group-item list-group-item-action">Manajemen Suplier</a>
-                    <a href="#" class="list-group-item list-group-item-action">Konfirmasi Pembayaran</a>
-                    <a href="#" class="list-group-item list-group-item-action">Pembayaran</a>
-                    <a href="#" class="list-group-item list-group-item-action">Laporan</a>
-                    <a href="#" class="list-group-item list-group-item-action">Stok</a>
-                    <a href="#" class="list-group-item list-group-item-action">Kembalian</a>
-                    <a href="#" class="list-group-item list-group-item-action">Satuan</a>
+                    <a href="#produk" class="list-group-item list-group-item-action" onclick="switchSection('produk')">Manajemen Produk</a>
+                    <a href="#kategori" class="list-group-item list-group-item-action" onclick="switchSection('kategori')">Manajemen Kategori</a>
+                    <a href="#suplier" class="list-group-item list-group-item-action" onclick="switchSection('suplier')">Manajemen Suplier</a>
+                    <a href="#stok" class="list-group-item list-group-item-action" onclick="switchSection('stok')">Manajemen Stok</a>
+                    <a href="#satuan" class="list-group-item list-group-item-action" onclick="switchSection('satuan')">Manajemen Satuan</a>
                 </div>
             </div>
-            <div class="col-md-9">
-                <h1>Selamat Datang, Admin</h1>
 
-                <!-- Hak Akses: Admin -->
-                <div id="adminAccess">
+            <div class="col-md-9">
+                <!-- Halaman Produk -->
+                <div id="produkSection" class="hidden">
                     <h2>Manajemen Produk</h2>
-                    <div id="productList"></div>
-                    <h3>Tambah Produk</h3>
-                    <form id="productForm" class="hidden">
+                    <form id="productForm" class="mb-4">
                         <div class="form-group">
                             <label for="productName">Nama Produk</label>
-                            <input type="text" class="form-control" id="productName" placeholder="Masukkan nama produk">
+                            <input type="text" id="productName" class="form-control" placeholder="Masukkan nama produk">
                         </div>
                         <div class="form-group">
                             <label for="productPrice">Harga Produk</label>
-                            <input type="number" class="form-control" id="productPrice" placeholder="Masukkan harga produk">
+                            <input type="number" id="productPrice" class="form-control" placeholder="Masukkan harga produk">
                         </div>
                         <button type="submit" class="btn btn-primary">Tambah Produk</button>
                     </form>
+                    <div id="productListDisplay"></div>
+                </div>
 
-                    <!-- List Produk -->
-                    <div id="productListDisplay" class="mt-4"></div>
-
-                    <!-- Manajemen Kategori -->
+                <!-- Halaman Kategori -->
+                <div id="kategoriSection" class="hidden">
                     <h2>Manajemen Kategori</h2>
-                    <div id="categoryList"></div>
-                    <h3>Tambah Kategori</h3>
-                    <form id="categoryForm" class="hidden">
+                    <form id="categoryForm" class="mb-4">
                         <div class="form-group">
                             <label for="categoryName">Nama Kategori</label>
-                            <input type="text" class="form-control" id="categoryName" placeholder="Masukkan nama kategori">
+                            <input type="text" id="categoryName" class="form-control" placeholder="Masukkan nama kategori">
                         </div>
                         <button type="submit" class="btn btn-primary">Tambah Kategori</button>
                     </form>
-                    <div id="categoryListDisplay" class="mt-4"></div>
+                    <div id="categoryListDisplay"></div>
+                </div>
 
-                    <!-- Manajemen Suplier -->
+                <!-- Halaman Suplier -->
+                <div id="suplierSection" class="hidden">
                     <h2>Manajemen Suplier</h2>
-                    <div id="supplierList"></div>
-                    <h3>Tambah Suplier</h3>
-                    <form id="supplierForm" class="hidden">
+                    <form id="supplierForm" class="mb-4">
                         <div class="form-group">
                             <label for="supplierName">Nama Suplier</label>
-                            <input type="text" class="form-control" id="supplierName" placeholder="Masukkan nama suplier">
+                            <input type="text" id="supplierName" class="form-control" placeholder="Masukkan nama suplier">
                         </div>
                         <div class="form-group">
                             <label for="supplierContact">Kontak Suplier</label>
-                            <input type="text" class="form-control" id="supplierContact" placeholder="Masukkan kontak suplier">
+                            <input type="text" id="supplierContact" class="form-control" placeholder="Masukkan kontak suplier">
                         </div>
                         <button type="submit" class="btn btn-primary">Tambah Suplier</button>
                     </form>
-                    <div id="supplierListDisplay" class="mt-4"></div>
+                    <div id="supplierListDisplay"></div>
+                </div>
 
-                    <!-- Konfirmasi Pembayaran -->
-                    <h2>Konfirmasi Pembayaran</h2>
-                    <div id="paymentConfirmList"></div>
-                    <h3>Konfirmasi Pembayaran</h3>
-                    <form id="paymentConfirmForm" class="hidden">
-                        <div class="form-group">
-                            <label for="paymentId">ID Pembayaran</label>
-                            <input type="text" class="form-control" id="paymentId" placeholder="Masukkan ID pembayaran">
-                        </div>
-                        <button type="submit" class="btn btn-primary">Konfirmasi</button>
-                    </form>
-                    <div id="paymentConfirmListDisplay" class="mt-4"></div>
-
-                    <!-- Pembayaran -->
-                    <h2>Pembayaran</h2>
-                    <div id="paymentList"></div>
-                    <h3>Proses Pembayaran</h3>
-                    <form id="paymentForm" class="hidden">
-                        <div class="form-group">
-                            <label for="totalAmount">Total Pembayaran</label>
-                            <input type="number" class="form-control" id="totalAmount" placeholder="Masukkan total pembayaran">
-                        </div>
-                        <button type="submit" class="btn btn-primary">Proses Pembayaran</button>
-                    </form>
-                    <div id="paymentListDisplay" class="mt-4"></div>
-
-                    <!-- Stok -->
-                    <h2>Stok</h2>
-                    <div id="stockList"></div>
-                    <h3>Atur Stok Produk</h3>
-                    <form id="stockForm" class="hidden">
+                <!-- Halaman Stok -->
+                <div id="stokSection" class="hidden">
+                    <h2>Manajemen Stok</h2>
+                    <form id="stockForm" class="mb-4">
                         <div class="form-group">
                             <label for="stockProduct">Produk</label>
-                            <select class="form-control" id="stockProduct"></select>
+                            <select id="stockProduct" class="form-control"></select>
                         </div>
                         <div class="form-group">
                             <label for="stockQuantity">Jumlah Stok</label>
-                            <input type="number" class="form-control" id="stockQuantity" placeholder="Masukkan jumlah stok">
+                            <input type="number" id="stockQuantity" class="form-control" placeholder="Masukkan jumlah stok">
                         </div>
-                        <button type="submit" class="btn btn-primary">Update Stok</button>
+                        <button type="submit" class="btn btn-primary">Tambah Stok</button>
                     </form>
-                    <div id="stockListDisplay" class="mt-4"></div>
+                    <div id="stockListDisplay"></div>
+                </div>
 
-                    <!-- Kembalian -->
-                    <h2>Kembalian</h2>
-                    <div id="refundList"></div>
-                    <h3>Atur Kembalian</h3>
-                    <form id="refundForm" class="hidden">
-                        <div class="form-group">
-                            <label for="returnAmount">Jumlah Kembalian</label>
-                            <input type="number" class="form-control" id="returnAmount" placeholder="Masukkan jumlah kembalian">
-                        </div>
-                        <button type="submit" class="btn btn-primary">Simpan Kembalian</button>
-                    </form>
-                    <div id="refundListDisplay" class="mt-4"></div>
-
-                    <!-- Satuan -->
-                    <h2>Satuan</h2>
-                    <div id="unitList"></div>
-                    <h3>Tambah Satuan</h3>
-                    <form id="unitForm" class="hidden">
+                <!-- Halaman Satuan -->
+                <div id="satuanSection" class="hidden">
+                    <h2>Manajemen Satuan</h2>
+                    <form id="unitForm" class="mb-4">
                         <div class="form-group">
                             <label for="unitName">Nama Satuan</label>
-                            <input type="text" class="form-control" id="unitName" placeholder="Masukkan nama satuan">
+                            <input type="text" id="unitName" class="form-control" placeholder="Masukkan nama satuan">
                         </div>
                         <button type="submit" class="btn btn-primary">Tambah Satuan</button>
                     </form>
-                    <div id="unitListDisplay" class="mt-4"></div>
+                    <div id="unitListDisplay"></div>
                 </div>
-
-                <!-- Hak Akses: Kasir & Operator -->
-                <div id="cashierAccess" class="hidden">
-                    <h2>Manajemen Produk</h2>
-                    <div id="productListDisplay"></div>
-                    <h3>Proses Pembayaran</h3>
-                    <form id="paymentForm" class="hidden">
-                        <div class="form-group">
-                            <label for="totalAmount">Total Pembayaran</label>
-                            <input type="number" class="form-control" id="totalAmount" placeholder="Masukkan total pembayaran">
-                        </div>
-                        <button type="submit" class="btn btn-primary">Proses Pembayaran</button>
-                    </form>
-                </div>
-
-                <div id="operatorAccess" class="hidden">
-                    <h2>Manajemen Stok</h2>
-                    <div id="stockListDisplay"></div>
-                    <h3>Atur Stok Produk</h3>
-                    <form id="stockForm" class="hidden">
-                        <div class="form-group">
-                            <label for="stockProduct">Produk</label>
-                            <select class="form-control" id="stockProduct"></select>
-                        </div>
-                        <div class="form-group">
-                            <label for="stockQuantity">Jumlah Stok</label>
-                            <input type="number" class="form-control" id="stockQuantity" placeholder="Masukkan jumlah stok">
-                        </div>
-                        <button type="submit" class="btn btn-primary">Update Stok</button>
-                    </form>
-                </div>
-
             </div>
         </div>
     </div>
+
+    <script>
+        // Fungsi untuk menampilkan section berdasarkan menu yang dipilih
+        function switchSection(sectionId) {
+            const sections = ['produk', 'kategori', 'suplier', 'stok', 'satuan'];
+            sections.forEach(id => {
+                document.getElementById(`${id}Section`).classList.add('hidden');
+            });
+            document.getElementById(`${sectionId}Section`).classList.remove('hidden');
+        }
+
+        // Default ke halaman produk
+        switchSection('produk');
+    </script>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>
 
 <script>
     // Data simulasi
