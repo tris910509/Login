@@ -5,7 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Halaman Admin</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-    <link rel="stylesheet" href="style.css"> <!-- Gaya tambahan -->
+    <style>
+        .hidden { display: none; }
+    </style>
 </head>
 <body>
     <nav class="navbar navbar-expand-lg navbar-light bg-light">
@@ -17,7 +19,7 @@
             <ul class="navbar-nav ml-auto">
                 <li class="nav-item"><a class="nav-link" href="#">Dashboard</a></li>
                 <li class="nav-item"><a class="nav-link" href="#">Profile</a></li>
-                <li class="nav-item"><a class="nav-link" href="#">Logout</a></li>
+                <li class="nav-item"><a class="nav-link" href="#" onclick="logout()">Logout</a></li>
             </ul>
         </div>
     </nav>
@@ -40,59 +42,184 @@
             <div class="col-md-9">
                 <h1>Selamat Datang, Admin</h1>
 
-                <!-- Manajemen Produk -->
-                <h2>Manajemen Produk</h2>
-                <div id="productList"></div>
-                <h3>Tambah Produk</h3>
-                <form id="productForm">
-                    <div class="form-group">
-                        <label for="productName">Nama Produk</label>
-                        <input type="text" class="form-control" id="productName" placeholder="Masukkan nama produk">
-                    </div>
-                    <div class="form-group">
-                        <label for="productPrice">Harga Produk</label>
-                        <input type="number" class="form-control" id="productPrice" placeholder="Masukkan harga produk">
-                    </div>
-                    <button type="submit" class="btn btn-primary">Tambah Produk</button>
-                </form>
+                <!-- Hak Akses: Admin -->
+                <div id="adminAccess">
+                    <h2>Manajemen Produk</h2>
+                    <div id="productList"></div>
+                    <h3>Tambah Produk</h3>
+                    <form id="productForm" class="hidden">
+                        <div class="form-group">
+                            <label for="productName">Nama Produk</label>
+                            <input type="text" class="form-control" id="productName" placeholder="Masukkan nama produk">
+                        </div>
+                        <div class="form-group">
+                            <label for="productPrice">Harga Produk</label>
+                            <input type="number" class="form-control" id="productPrice" placeholder="Masukkan harga produk">
+                        </div>
+                        <button type="submit" class="btn btn-primary">Tambah Produk</button>
+                    </form>
 
-                <!-- Manajemen Kategori -->
-                <h2>Manajemen Kategori</h2>
-                <div id="categoryList"></div>
-                <h3>Tambah Kategori</h3>
-                <form id="categoryForm">
-                    <div class="form-group">
-                        <label for="categoryName">Nama Kategori</label>
-                        <input type="text" class="form-control" id="categoryName" placeholder="Masukkan nama kategori">
-                    </div>
-                    <button type="submit" class="btn btn-primary">Tambah Kategori</button>
-                </form>
+                    <!-- Manajemen Kategori -->
+                    <h2>Manajemen Kategori</h2>
+                    <div id="categoryList"></div>
+                    <h3>Tambah Kategori</h3>
+                    <form id="categoryForm" class="hidden">
+                        <div class="form-group">
+                            <label for="categoryName">Nama Kategori</label>
+                            <input type="text" class="form-control" id="categoryName" placeholder="Masukkan nama kategori">
+                        </div>
+                        <button type="submit" class="btn btn-primary">Tambah Kategori</button>
+                    </form>
 
-                <!-- Manajemen Suplier -->
-                <h2>Manajemen Suplier</h2>
-                <div id="supplierList"></div>
-                <h3>Tambah Suplier</h3>
-                <form id="supplierForm">
-                    <div class="form-group">
-                        <label for="supplierName">Nama Suplier</label>
-                        <input type="text" class="form-control" id="supplierName" placeholder="Masukkan nama suplier">
-                    </div>
-                    <div class="form-group">
-                        <label for="supplierContact">Kontak Suplier</label>
-                        <input type="text" class="form-control" id="supplierContact" placeholder="Masukkan kontak suplier">
-                    </div>
-                    <button type="submit" class="btn btn-primary">Tambah Suplier</button>
-                </form>
+                    <!-- Manajemen Suplier -->
+                    <h2>Manajemen Suplier</h2>
+                    <div id="supplierList"></div>
+                    <h3>Tambah Suplier</h3>
+                    <form id="supplierForm" class="hidden">
+                        <div class="form-group">
+                            <label for="supplierName">Nama Suplier</label>
+                            <input type="text" class="form-control" id="supplierName" placeholder="Masukkan nama suplier">
+                        </div>
+                        <div class="form-group">
+                            <label for="supplierContact">Kontak Suplier</label>
+                            <input type="text" class="form-control" id="supplierContact" placeholder="Masukkan kontak suplier">
+                        </div>
+                        <button type="submit" class="btn btn-primary">Tambah Suplier</button>
+                    </form>
+
+                    <!-- Konfirmasi Pembayaran -->
+                    <h2>Konfirmasi Pembayaran</h2>
+                    <div id="paymentConfirmList"></div>
+                    <h3>Konfirmasi Pembayaran</h3>
+                    <form id="paymentConfirmForm" class="hidden">
+                        <div class="form-group">
+                            <label for="paymentId">ID Pembayaran</label>
+                            <input type="text" class="form-control" id="paymentId" placeholder="Masukkan ID pembayaran">
+                        </div>
+                        <button type="submit" class="btn btn-primary">Konfirmasi</button>
+                    </form>
+
+                    <!-- Pembayaran -->
+                    <h2>Pembayaran</h2>
+                    <div id="paymentList"></div>
+                    <h3>Proses Pembayaran</h3>
+                    <form id="paymentForm" class="hidden">
+                        <div class="form-group">
+                            <label for="totalAmount">Total Pembayaran</label>
+                            <input type="number" class="form-control" id="totalAmount" placeholder="Masukkan total pembayaran">
+                        </div>
+                        <button type="submit" class="btn btn-primary">Proses Pembayaran</button>
+                    </form>
+
+                    <!-- Stok -->
+                    <h2>Stok</h2>
+                    <div id="stockList"></div>
+                    <h3>Atur Stok Produk</h3>
+                    <form id="stockForm" class="hidden">
+                        <div class="form-group">
+                            <label for="stockProduct">Produk</label>
+                            <select class="form-control" id="stockProduct"></select>
+                        </div>
+                        <div class="form-group">
+                            <label for="stockQuantity">Jumlah Stok</label>
+                            <input type="number" class="form-control" id="stockQuantity" placeholder="Masukkan jumlah stok">
+                        </div>
+                        <button type="submit" class="btn btn-primary">Update Stok</button>
+                    </form>
+
+                    <!-- Kembalian -->
+                    <h2>Kembalian</h2>
+                    <div id="refundList"></div>
+                    <h3>Atur Kembalian</h3>
+                    <form id="refundForm" class="hidden">
+                        <div class="form-group">
+                            <label for="returnAmount">Jumlah Kembalian</label>
+                            <input type="number" class="form-control" id="returnAmount" placeholder="Masukkan jumlah kembalian">
+                        </div>
+                        <button type="submit" class="btn btn-primary">Simpan Kembalian</button>
+                    </form>
+
+                    <!-- Satuan -->
+                    <h2>Satuan</h2>
+                    <div id="unitList"></div>
+                    <h3>Tambah Satuan</h3>
+                    <form id="unitForm" class="hidden">
+                        <div class="form-group">
+                            <label for="unitName">Nama Satuan</label>
+                            <input type="text" class="form-control" id="unitName" placeholder="Masukkan nama satuan">
+                        </div>
+                        <button type="submit" class="btn btn-primary">Tambah Satuan</button>
+                    </form>
+                </div>
+
+                <!-- Hak Akses: Kasir & Operator -->
+                <div id="cashierAccess" class="hidden">
+                    <h2>Manajemen Produk</h2>
+                    <div id="productList"></div>
+                    <h3>Proses Pembayaran</h3>
+                    <form id="paymentForm" class="hidden">
+                        <div class="form-group">
+                            <label for="totalAmount">Total Pembayaran</label>
+                            <input type="number" class="form-control" id="totalAmount" placeholder="Masukkan total pembayaran">
+                        </div>
+                        <button type="submit" class="btn btn-primary">Proses Pembayaran</button>
+                    </form>
+                </div>
+
+                <div id="operatorAccess" class="hidden">
+                    <!-- Tampilan operator -->
+                    <h2>Manajemen Stok</h2>
+                    <div id="stockList"></div>
+                    <h3>Atur Stok Produk</h3>
+                    <form id="stockForm" class="hidden">
+                        <div class="form-group">
+                            <label for="stockProduct">Produk</label>
+                            <select class="form-control" id="stockProduct"></select>
+                        </div>
+                        <div class="form-group">
+                            <label for="stockQuantity">Jumlah Stok</label>
+                            <input type="number" class="form-control" id="stockQuantity" placeholder="Masukkan jumlah stok">
+                        </div>
+                        <button type="submit" class="btn btn-primary">Update Stok</button>
+                    </form>
+                </div>
 
             </div>
         </div>
     </div>
 
     <script>
+        // Simulasi role user berdasarkan ID (contoh role: 1=Admin, 2=Kasir, 3=Operator)
+        const userRole = 1; // Set role ID ini sesuai dengan role pengguna yang dipilih
+
         // Array untuk menyimpan data
         let products = [];
         let categories = [];
         let suppliers = [];
+        let payments = [];
+        let stocks = [];
+        let refunds = [];
+        let units = [];
+
+        // Fungsi untuk menampilkan data sesuai role
+        function showAccess(role) {
+            if (role === 1) { // Admin
+                document.getElementById('adminAccess').classList.remove('hidden');
+                document.getElementById('cashierAccess').classList.add('hidden');
+                document.getElementById('operatorAccess').classList.add('hidden');
+            } else if (role === 2) { // Kasir
+                document.getElementById('adminAccess').classList.add('hidden');
+                document.getElementById('cashierAccess').classList.remove('hidden');
+                document.getElementById('operatorAccess').classList.add('hidden');
+            } else if (role === 3) { // Operator
+                document.getElementById('adminAccess').classList.add('hidden');
+                document.getElementById('cashierAccess').classList.add('hidden');
+                document.getElementById('operatorAccess').classList.remove('hidden');
+            }
+        }
+
+        // Menampilkan hak akses berdasarkan role
+        showAccess(userRole);
 
         // Tambah Produk
         document.getElementById('productForm').addEventListener('submit', function(e) {
@@ -105,6 +232,7 @@
                 document.getElementById('productName').value = '';
                 document.getElementById('productPrice').value = '';
                 renderProductList();
+                populateSelectOptions();
             }
         });
 
@@ -117,6 +245,7 @@
                 categories.push(categoryName);
                 document.getElementById('categoryName').value = '';
                 renderCategoryList();
+                populateSelectOptions();
             }
         });
 
@@ -131,10 +260,61 @@
                 document.getElementById('supplierName').value = '';
                 document.getElementById('supplierContact').value = '';
                 renderSupplierList();
+                populateSelectOptions();
             }
         });
 
-        // Render Produk
+        // Tambah Konfirmasi Pembayaran
+        document.getElementById('paymentConfirmForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const paymentId = document.getElementById('paymentId').value;
+
+            if (paymentId) {
+                payments.push(paymentId);
+                document.getElementById('paymentId').value = '';
+                renderPaymentList();
+            }
+        });
+
+        // Tambah Pembayaran
+        document.getElementById('paymentForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const totalAmount = document.getElementById('totalAmount').value;
+
+            if (totalAmount) {
+                refunds.push(parseFloat(totalAmount));
+                document.getElementById('totalAmount').value = '';
+                renderRefundList();
+            }
+        });
+
+        // Tambah Stok
+        document.getElementById('stockForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const productName = document.getElementById('stockProduct').value;
+            const stockQuantity = document.getElementById('stockQuantity').value;
+
+            if (productName && stockQuantity) {
+                stocks.push({ product: productName, quantity: stockQuantity });
+                document.getElementById('stockQuantity').value = '';
+                renderStockList();
+            }
+        });
+
+        // Tambah Satuan
+        document.getElementById('unitForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const unitName = document.getElementById('unitName').value;
+
+            if (unitName) {
+                units.push(unitName);
+                document.getElementById('unitName').value = '';
+                renderUnitList();
+                populateSelectOptions();
+            }
+        });
+
+        // Fungsi untuk render produk, kategori, suplier, pembayaran, stok, dan satuan
         function renderProductList() {
             const productList = document.getElementById('productList');
             productList.innerHTML = '<ul class="list-group">' + products.map((product, index) => `
@@ -145,7 +325,6 @@
             `).join('') + '</ul>';
         }
 
-        // Render Kategori
         function renderCategoryList() {
             const categoryList = document.getElementById('categoryList');
             categoryList.innerHTML = '<ul class="list-group">' + categories.map((category, index) => `
@@ -156,7 +335,6 @@
             `).join('') + '</ul>';
         }
 
-        // Render Suplier
         function renderSupplierList() {
             const supplierList = document.getElementById('supplierList');
             supplierList.innerHTML = '<ul class="list-group">' + suppliers.map((supplier, index) => `
@@ -167,22 +345,94 @@
             `).join('') + '</ul>';
         }
 
-        // Delete Product
+        function renderPaymentList() {
+            const paymentList = document.getElementById('paymentList');
+            paymentList.innerHTML = '<ul class="list-group">' + payments.map((payment, index) => `
+                <li class="list-group-item">
+                    ${payment} 
+                    <button class="btn btn-danger btn-sm float-right" onclick="deletePayment(${index})">Hapus</button>
+                </li>
+            `).join('') + '</ul>';
+        }
+
+        function renderStockList() {
+            const stockList = document.getElementById('stockList');
+            stockList.innerHTML = '<ul class="list-group">' + stocks.map((stock, index) => `
+                <li class="list-group-item">
+                    ${stock.product} - ${stock.quantity} 
+                    <button class="btn btn-danger btn-sm float-right" onclick="deleteStock(${index})">Hapus</button>
+                </li>
+            `).join('') + '</ul>';
+        }
+
+        function renderRefundList() {
+            const refundList = document.getElementById('refundList');
+            refundList.innerHTML = '<ul class="list-group">' + refunds.map((refund, index) => `
+                <li class="list-group-item">
+                    Rp. ${refund} 
+                    <button class="btn btn-danger btn-sm float-right" onclick="deleteRefund(${index})">Hapus</button>
+                </li>
+            `).join('') + '</ul>';
+        }
+
+        function renderUnitList() {
+            const unitList = document.getElementById('unitList');
+            unitList.innerHTML = '<ul class="list-group">' + units.map((unit, index) => `
+                <li class="list-group-item">
+                    ${unit} 
+                    <button class="btn btn-danger btn-sm float-right" onclick="deleteUnit(${index})">Hapus</button>
+                </li>
+            `).join('') + '</ul>';
+        }
+
+        // Fungsi untuk hapus item
         function deleteProduct(index) {
             products.splice(index, 1);
             renderProductList();
         }
 
-        // Delete Category
         function deleteCategory(index) {
             categories.splice(index, 1);
             renderCategoryList();
         }
 
-        // Delete Supplier
         function deleteSupplier(index) {
             suppliers.splice(index, 1);
             renderSupplierList();
+        }
+
+        function deletePayment(index) {
+            payments.splice(index, 1);
+            renderPaymentList();
+        }
+
+        function deleteStock(index) {
+            stocks.splice(index, 1);
+            renderStockList();
+        }
+
+        function deleteRefund(index) {
+            refunds.splice(index, 1);
+            renderRefundList();
+        }
+
+        function deleteUnit(index) {
+            units.splice(index, 1);
+            renderUnitList();
+        }
+
+        // Populate Select Options for Stock & Other Dropdowns
+        function populateSelectOptions() {
+            const productSelect = document.getElementById('stockProduct');
+            productSelect.innerHTML = '<option value="">Pilih Produk</option>' + products.map(product => `
+                <option value="${product.name}">${product.name}</option>
+            `).join('');
+        }
+
+        // Fungsi logout
+        function logout() {
+            // Redirect ke halaman login atau sesuaikan logic logout
+            window.location.href = 'login.html'; // Contoh: halaman login
         }
     </script>
 
