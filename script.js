@@ -136,8 +136,42 @@ function showAlert(message, type = "success") {
 
 //fungsi untuk admin mengelola pengguna di
 function manageUsers() {
-    const users = JSON.parse(localStorage.getItem("users")) || [];
-    const userList = users.map((user, index) => `
+    const users = loadFromLocalStorage("users");
+    renderUserManagement(users);
+
+    // Form Tambah Pengguna
+    document.getElementById("addUserForm").addEventListener("submit", function (e) {
+        e.preventDefault();
+        const username = document.getElementById("newUsername").value.trim();
+        const password = document.getElementById("newPassword").value;
+        const role = document.getElementById("newRole").value;
+
+        if (users.some((u) => u.username === username)) {
+            showAlert("Username sudah ada!", "danger");
+            return;
+        }
+
+        users.push({ username, password, role });
+        saveToLocalStorage("users", users);
+        logActivity(`Admin menambahkan pengguna: ${username}`);
+        renderUserManagement(users);
+        showAlert("Pengguna berhasil ditambahkan!", "success");
+    });
+
+    // Pencarian
+    document.getElementById("searchUser").addEventListener("input", function (e) {
+        const searchTerm = e.target.value.toLowerCase();
+        const filteredUsers = users.filter((u) =>
+            u.username.toLowerCase().includes(searchTerm) || u.role.toLowerCase().includes(searchTerm)
+        );
+        renderUserManagement(filteredUsers);
+    });
+}
+
+function renderUserManagement(users) {
+    const userRows = users
+        .map(
+            (user, index) => `
         <tr>
             <td>${index + 1}</td>
             <td>${user.username}</td>
@@ -146,90 +180,154 @@ function manageUsers() {
                 <button class="btn btn-warning btn-sm" onclick="editUser(${index})">Edit</button>
                 <button class="btn btn-danger btn-sm" onclick="deleteUser(${index})">Hapus</button>
             </td>
-        </tr>
-    `).join("");
+        </tr>`
+        )
+        .join("");
 
     document.getElementById("dashboardContent").innerHTML = `
-        <h1>Kelola Pengguna</h1>
-        <table class="table table-striped">
+        <h2>Manajemen Pengguna</h2>
+        <div class="mb-3">
+            <input type="text" id="searchUser" class="form-control" placeholder="Cari pengguna...">
+        </div>
+        <form id="addUserForm" class="mb-3">
+            <div class="input-group">
+                <input type="text" id="newUsername" class="form-control" placeholder="Username" required>
+                <input type="password" id="newPassword" class="form-control" placeholder="Password" required>
+                <select id="newRole" class="form-select">
+                    <option value="admin">Admin</option>
+                    <option value="kasir">Kasir</option>
+                    <option value="operator">Operator</option>
+                </select>
+                <button type="submit" class="btn btn-primary">Tambah</button>
+            </div>
+        </form>
+        <button class="btn btn-success mb-3" onclick="exportToCSV('users', ${JSON.stringify(users)})">Export ke CSV</button>
+        <table class="table table-bordered">
             <thead>
                 <tr>
-                    <th>#</th>
+                    <th>No</th>
                     <th>Username</th>
                     <th>Role</th>
                     <th>Aksi</th>
                 </tr>
             </thead>
-            <tbody>${userList}</tbody>
+            <tbody>${userRows}</tbody>
         </table>
     `;
 }
 
 function editUser(index) {
-    alert(`Edit pengguna pada indeks ${index}.`);
+    const users = loadFromLocalStorage("users");
+    const user = users[index];
+
+    const newUsername = prompt("Masukkan username baru:", user.username);
+    const newRole = prompt("Masukkan role baru (admin/kasir/operator):", user.role);
+
+    if (newUsername && newRole) {
+        users[index] = { ...user, username: newUsername, role: newRole };
+        saveToLocalStorage("users", users);
+        logActivity(`Admin mengedit pengguna: ${user.username}`);
+        manageUsers();
+        showAlert("Pengguna berhasil diperbarui!", "success");
+    }
 }
 
 function deleteUser(index) {
-    let users = JSON.parse(localStorage.getItem("users")) || [];
-    users.splice(index, 1);
-    localStorage.setItem("users", JSON.stringify(users));
-    manageUsers();
-    showAlert("Pengguna berhasil dihapus!", "success");
+    const users = loadFromLocalStorage("users");
+    if (confirm("Yakin ingin menghapus pengguna ini?")) {
+        const deletedUser = users.splice(index, 1);
+        saveToLocalStorage("users", users);
+        logActivity(`Admin menghapus pengguna: ${deletedUser[0].username}`);
+        manageUsers();
+        showAlert("Pengguna berhasil dihapus!", "success");
+    }
 }
 
 
 
 //Kasir dapat menambahkan dan melihat daftar transaksi
 function manageTransactions() {
-    const transactions = JSON.parse(localStorage.getItem("transactions")) || [];
-    const transactionList = transactions.map((trx, index) => `
+    const transactions = loadFromLocalStorage("transactions");
+    renderTransactionManagement(transactions);
+
+    // Form Tambah Transaksi
+    document.getElementById("addTransactionForm").addEventListener("submit", function (e) {
+        e.preventDefault();
+        const item = document.getElementById("itemName").value.trim();
+        const amount = parseInt(document.getElementById("itemAmount").value);
+        const date = new Date().toLocaleDateString();
+
+        transactions.push({ item, amount, date });
+        saveToLocalStorage("transactions", transactions);
+        logActivity(`Kasir menambahkan transaksi: ${item}`);
+        renderTransactionManagement(transactions);
+        showAlert("Transaksi berhasil ditambahkan!", "success");
+    });
+
+    // Pencarian
+    document.getElementById("searchTransaction").addEventListener("input", function (e) {
+        const searchTerm = e.target.value.toLowerCase();
+        const filteredTransactions = transactions.filter((trx) =>
+            trx.item.toLowerCase().includes(searchTerm)
+        );
+        renderTransactionManagement(filteredTransactions);
+    });
+}
+
+function renderTransactionManagement(transactions) {
+    const transactionRows = transactions
+        .map(
+            (trx, index) => `
         <tr>
             <td>${index + 1}</td>
             <td>${trx.item}</td>
             <td>${trx.amount}</td>
             <td>${trx.date}</td>
-        </tr>
-    `).join("");
+            <td>
+                <button class="btn btn-warning btn-sm" onclick="editTransaction(${index})">Edit</button>
+                <button class="btn btn-danger btn-sm" onclick="deleteTransaction(${index})">Hapus</button>
+            </td>
+        </tr>`
+        )
+        .join("");
 
     document.getElementById("dashboardContent").innerHTML = `
-        <h1>Kelola Transaksi</h1>
-        <form id="transactionForm">
-            <div class="mb-3">
-                <label for="item" class="form-label">Nama Barang</label>
-                <input type="text" id="item" class="form-control" required>
+        <h2>Manajemen Transaksi</h2>
+        <div class="mb-3">
+            <input type="text" id="searchTransaction" class="form-control" placeholder="Cari transaksi...">
+        </div>
+        <form id="addTransactionForm" class="mb-3">
+            <div class="input-group">
+                <input type="text" id="itemName" class="form-control" placeholder="Nama Barang" required>
+                <input type="number" id="itemAmount" class="form-control" placeholder="Jumlah" required>
+                <button type="submit" class="btn btn-primary">Tambah</button>
             </div>
-            <div class="mb-3">
-                <label for="amount" class="form-label">Jumlah</label>
-                <input type="number" id="amount" class="form-control" required>
-            </div>
-            <button type="submit" class="btn btn-primary">Tambah Transaksi</button>
         </form>
-        <table class="table table-striped mt-3">
+        <button class="btn btn-success mb-3" onclick="exportToCSV('transactions', ${JSON.stringify(transactions)})">Export ke CSV</button>
+        <table class="table table-bordered">
             <thead>
                 <tr>
-                    <th>#</th>
+                    <th>No</th>
                     <th>Nama Barang</th>
                     <th>Jumlah</th>
                     <th>Tanggal</th>
+                    <th>Aksi</th>
                 </tr>
             </thead>
-            <tbody>${transactionList}</tbody>
+            <tbody>${transactionRows}</tbody>
         </table>
     `;
-
-    document.getElementById("transactionForm").addEventListener("submit", function (e) {
-        e.preventDefault();
-        const item = document.getElementById("item").value;
-        const amount = document.getElementById("amount").value;
-        const date = new Date().toLocaleDateString();
-
-        transactions.push({ item, amount, date });
-        localStorage.setItem("transactions", JSON.stringify(transactions));
-        manageTransactions();
-        showAlert("Transaksi berhasil ditambahkan!", "success");
-    });
 }
 
+
+function exportToCSV(filename, data) {
+    const csvContent = data.map((row) => Object.values(row).join(",")).join("\n");
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = `${filename}.csv`;
+    link.click();
+}
 
 
 
