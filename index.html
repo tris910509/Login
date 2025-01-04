@@ -75,6 +75,7 @@
         };
 
         document.addEventListener("DOMContentLoaded", () => {
+            // Load data from localStorage
             Object.keys(sections).forEach(sectionId => {
                 const storedData = localStorage.getItem(sectionId);
                 if (storedData) sections[sectionId].data = JSON.parse(storedData);
@@ -231,69 +232,65 @@
             if (quantity > product.stock) return alert("Jumlah melebihi stok!");
 
             const subtotal = product.price * quantity;
-            product.stock -= quantity;
             sections.transaksi.data.push({ product: product.name, quantity, subtotal });
             localStorage.setItem("transaksi", JSON.stringify(sections.transaksi.data));
+
+            showNotification('Produk berhasil ditambahkan ke keranjang!', 'success');
             renderTransaksiSection();
         }
 
-        function renderCartRows(cart) {
-            return cart.map((item, index) => `
+        function renderCartRows(cartData) {
+            return cartData.map((item, index) => `
                 <tr>
                     <td>${index + 1}</td>
                     <td>${item.product}</td>
                     <td>${item.quantity}</td>
                     <td>Rp ${item.subtotal}</td>
                     <td>
-                        <button class="btn btn-warning btn-sm" onclick="editCartItem(${index})">Edit</button>
-                        <button class="btn btn-danger btn-sm" onclick="deleteCartItem(${index})">Hapus</button>
+                        <button class="btn btn-danger btn-sm" onclick="removeFromCart(${index})">Hapus</button>
                     </td>
                 </tr>
             `).join('');
         }
 
-        function editCartItem(index) {
-            const item = sections.transaksi.data[index];
-            document.getElementById("product").value = sections.produk.data.findIndex(product => product.name === item.product);
-            document.getElementById("quantity").value = item.quantity;
-            deleteCartItem(index);
-        }
-
-        function deleteCartItem(index) {
-            const productIndex = sections.produk.data.findIndex(product => product.name === sections.transaksi.data[index].product);
-            sections.produk.data[productIndex].stock += sections.transaksi.data[index].quantity;
+        function removeFromCart(index) {
             sections.transaksi.data.splice(index, 1);
             localStorage.setItem("transaksi", JSON.stringify(sections.transaksi.data));
+            showNotification('Produk berhasil dihapus dari keranjang!', 'danger');
             renderTransaksiSection();
         }
 
         function calculateTotal() {
-            const total = sections.transaksi.data.reduce((acc, item) => acc + item.subtotal, 0);
-            document.getElementById("totalAmount").innerText = `Rp ${total}`;
+            const total = sections.transaksi.data.reduce((sum, item) => sum + item.subtotal, 0);
+            document.getElementById("totalAmount").textContent = `Rp ${total}`;
         }
 
         function processPayment() {
-            const total = sections.transaksi.data.reduce((acc, item) => acc + item.subtotal, 0);
-            const payment = parseInt(document.getElementById("payment").value);
-            if (payment < total) return alert("Pembayaran tidak cukup!");
+            const payment = parseFloat(document.getElementById("payment").value);
+            const total = sections.transaksi.data.reduce((sum, item) => sum + item.subtotal, 0);
 
+            if (payment < total) return alert("Jumlah pembayaran kurang dari total transaksi!");
+            
             const change = payment - total;
-            alert(`Transaksi berhasil! Kembalian: Rp ${change}`);
-
-            sections.laporan.data.push({
-                date: new Date().toLocaleString(),
-                total,
-                items: [...sections.transaksi.data],
-            });
-            localStorage.setItem("laporan", JSON.stringify(sections.laporan.data));
-
+            showNotification(`Pembayaran berhasil! Kembalian: Rp ${change}`, 'success');
             sections.transaksi.data = [];
             localStorage.setItem("transaksi", JSON.stringify([]));
             renderTransaksiSection();
         }
 
         function renderLaporanSection() {
-            const rows = sections.laporan.data.map((laporan, index) => `
+            const laporanRows = sections.transaksi.data.reduce((acc, curr) => {
+                const date = new Date();
+                const laporan = acc.find(lap => lap.date === date.toISOString().split('T')[0]);
+
+                if (laporan) {
+                    laporan.items.push(curr);
+                } else {
+                    acc.push({ date: date.toISOString().split('T')[0], total: curr.subtotal, items: [curr] });
+                }
+
+                return acc;
+            }, []).map((laporan, index) => `
                 <tr>
                     <td>${index + 1}</td>
                     <td>${laporan.date}</td>
@@ -316,7 +313,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        ${rows}
+                        ${laporanRows}
                     </tbody>
                 </table>
                 <div id="laporanDetail" class="hidden"></div>
@@ -324,7 +321,7 @@
         }
 
         function showLaporanDetail(index) {
-            const laporan = sections.laporan.data[index];
+            const laporan = sections.transaksi.data[index];
             const items = laporan.items.map(item => `
                 <tr>
                     <td>${item.product}</td>
@@ -372,5 +369,6 @@
             }, 3000);
         }
     </script>
+
 </body>
 </html>
