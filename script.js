@@ -58,3 +58,20 @@ document.addEventListener("DOMContentLoaded", () => {
         showWelcomeMessage(currentUser);
     }
 });
+
+//Tambahkan logika untuk navigasi ke halaman masing-masing:
+function navigate(role) {
+    const currentUser = JSON.parse(localStorage.getItem("currentUser"));
+
+    if (currentUser && currentUser.role === role) {
+        if (role === "admin") {
+            window.location.href = "admin.html";
+        } else if (role === "kasir") {
+            window.location.href = "kasir.html";
+        } else if (role === "operator") {
+            window.location.href = "operator.html";
+        }
+    } else {
+        alert("Akses ditolak! Anda tidak memiliki hak untuk mengakses halaman ini.");
+    }
+}
