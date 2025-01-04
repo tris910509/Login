@@ -75,3 +75,43 @@ function navigate(role) {
         alert("Akses ditolak! Anda tidak memiliki hak untuk mengakses halaman ini.");
     }
 }
+
+
+// Dark/Light Mode Toggle
+document.getElementById("toggleTheme").addEventListener("click", () => {
+    document.body.classList.toggle("bg-dark");
+    document.body.classList.toggle("text-light");
+
+    // Simpan preferensi tema di localStorage
+    const theme = document.body.classList.contains("bg-dark") ? "dark" : "light";
+    localStorage.setItem("theme", theme);
+});
+
+// Terapkan tema saat halaman dimuat
+document.addEventListener("DOMContentLoaded", () => {
+    const savedTheme = localStorage.getItem("theme");
+    if (savedTheme === "dark") {
+        document.body.classList.add("bg-dark", "text-light");
+    }
+});
+
+// Tambahkan logika logout otomatis setelah 10 menit tidak aktif.
+
+let timeout;
+
+function resetTimeout() {
+    clearTimeout(timeout);
+    timeout = setTimeout(() => {
+        alert("Sesi Anda telah berakhir. Silakan login kembali.");
+        logout();
+    }, 10 * 60 * 1000); // 10 menit
+}
+
+// Pantau aktivitas pengguna
+document.addEventListener("mousemove", resetTimeout);
+document.addEventListener("keypress", resetTimeout);
+
+// Mulai timer saat halaman dimuat
+resetTimeout();
+
+
