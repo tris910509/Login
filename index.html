@@ -7,9 +7,18 @@
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <style>
         .hidden { display: none; }
+        .active { font-weight: bold; color: #007bff; }
+        .notification {
+            background-color: #28a745;
+            color: white;
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+        }
     </style>
 </head>
 <body>
+    <!-- Navbar -->
     <nav class="navbar navbar-expand-lg navbar-light bg-light">
         <a class="navbar-brand" href="#">Dashboard</a>
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
@@ -24,19 +33,25 @@
         </div>
     </nav>
 
+    <!-- Container -->
     <div class="container mt-4">
         <div class="row">
+            <!-- Sidebar -->
             <div class="col-md-3">
-                <div class="list-group">
-                    <a href="#produk" class="list-group-item list-group-item-action" onclick="switchSection('produk')">Manajemen Produk</a>
-                    <a href="#kategori" class="list-group-item list-group-item-action" onclick="switchSection('kategori')">Manajemen Kategori</a>
-                    <a href="#suplier" class="list-group-item list-group-item-action" onclick="switchSection('suplier')">Manajemen Suplier</a>
-                    <a href="#stok" class="list-group-item list-group-item-action" onclick="switchSection('stok')">Manajemen Stok</a>
-                    <a href="#satuan" class="list-group-item list-group-item-action" onclick="switchSection('satuan')">Manajemen Satuan</a>
+                <div class="list-group" id="menuSidebar">
+                    <a href="#produk" class="list-group-item list-group-item-action" onclick="switchSection('produk', this)">Manajemen Produk</a>
+                    <a href="#kategori" class="list-group-item list-group-item-action" onclick="switchSection('kategori', this)">Manajemen Kategori</a>
+                    <a href="#suplier" class="list-group-item list-group-item-action" onclick="switchSection('suplier', this)">Manajemen Suplier</a>
+                    <a href="#stok" class="list-group-item list-group-item-action" onclick="switchSection('stok', this)">Manajemen Stok</a>
+                    <a href="#satuan" class="list-group-item list-group-item-action" onclick="switchSection('satuan', this)">Manajemen Satuan</a>
                 </div>
             </div>
 
+            <!-- Main Content -->
             <div class="col-md-9">
+                <!-- Notifikasi -->
+                <div id="notification" class="notification hidden"></div>
+
                 <!-- Halaman Produk -->
                 <div id="produkSection" class="hidden">
                     <h2>Manajemen Produk</h2>
@@ -50,6 +65,7 @@
                             <input type="number" id="productPrice" class="form-control" placeholder="Masukkan harga produk">
                         </div>
                         <button type="submit" class="btn btn-primary">Tambah Produk</button>
+                        <button type="reset" class="btn btn-secondary">Reset</button>
                     </form>
                     <div id="productListDisplay"></div>
                 </div>
@@ -63,6 +79,7 @@
                             <input type="text" id="categoryName" class="form-control" placeholder="Masukkan nama kategori">
                         </div>
                         <button type="submit" class="btn btn-primary">Tambah Kategori</button>
+                        <button type="reset" class="btn btn-secondary">Reset</button>
                     </form>
                     <div id="categoryListDisplay"></div>
                 </div>
@@ -80,6 +97,7 @@
                             <input type="text" id="supplierContact" class="form-control" placeholder="Masukkan kontak suplier">
                         </div>
                         <button type="submit" class="btn btn-primary">Tambah Suplier</button>
+                        <button type="reset" class="btn btn-secondary">Reset</button>
                     </form>
                     <div id="supplierListDisplay"></div>
                 </div>
@@ -97,6 +115,7 @@
                             <input type="number" id="stockQuantity" class="form-control" placeholder="Masukkan jumlah stok">
                         </div>
                         <button type="submit" class="btn btn-primary">Tambah Stok</button>
+                        <button type="reset" class="btn btn-secondary">Reset</button>
                     </form>
                     <div id="stockListDisplay"></div>
                 </div>
@@ -110,6 +129,7 @@
                             <input type="text" id="unitName" class="form-control" placeholder="Masukkan nama satuan">
                         </div>
                         <button type="submit" class="btn btn-primary">Tambah Satuan</button>
+                        <button type="reset" class="btn btn-secondary">Reset</button>
                     </form>
                     <div id="unitListDisplay"></div>
                 </div>
@@ -117,203 +137,30 @@
         </div>
     </div>
 
+    <!-- JavaScript -->
     <script>
-        // Fungsi untuk menampilkan section berdasarkan menu yang dipilih
-        function switchSection(sectionId) {
+        function switchSection(sectionId, element) {
             const sections = ['produk', 'kategori', 'suplier', 'stok', 'satuan'];
-            sections.forEach(id => {
-                document.getElementById(`${id}Section`).classList.add('hidden');
-            });
+            sections.forEach(id => document.getElementById(`${id}Section`).classList.add('hidden'));
             document.getElementById(`${sectionId}Section`).classList.remove('hidden');
+
+            // Highlight menu aktif
+            document.querySelectorAll('#menuSidebar a').forEach(menu => menu.classList.remove('active'));
+            element.classList.add('active');
+        }
+
+        function showNotification(message) {
+            const notification = document.getElementById('notification');
+            notification.innerText = message;
+            notification.classList.remove('hidden');
+            setTimeout(() => notification.classList.add('hidden'), 3000);
         }
 
         // Default ke halaman produk
-        switchSection('produk');
+        switchSection('produk', document.querySelector('#menuSidebar a'));
     </script>
-
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 </body>
 </html>
-
-<script>
-    // Data simulasi
-    let products = [];
-    let categories = [];
-    let suppliers = [];
-    let payments = [];
-    let stocks = [];
-    let refunds = [];
-    let units = [];
-
-    // Fungsi untuk menentukan hak akses berdasarkan role
-    function showAccess(userRole) {
-        document.getElementById('adminAccess').classList.add('hidden');
-        document.getElementById('cashierAccess').classList.add('hidden');
-        document.getElementById('operatorAccess').classList.add('hidden');
-
-        if (userRole === 1) document.getElementById('adminAccess').classList.remove('hidden'); // Admin
-        else if (userRole === 2) document.getElementById('cashierAccess').classList.remove('hidden'); // Kasir
-        else if (userRole === 3) document.getElementById('operatorAccess').classList.remove('hidden'); // Operator
-    }
-
-    // Panggil fungsi untuk hak akses (contoh: role admin)
-    const userRole = 1; // 1 = Admin, 2 = Kasir, 3 = Operator
-    showAccess(userRole);
-
-    // Fungsi CRUD Produk
-    document.getElementById('productForm').addEventListener('submit', function (e) {
-        e.preventDefault();
-        const name = document.getElementById('productName').value;
-        const price = document.getElementById('productPrice').value;
-        if (name && price) {
-            products.push({ name, price });
-            renderProductList();
-            document.getElementById('productForm').reset();
-        }
-    });
-
-    function renderProductList() {
-        const productList = document.getElementById('productListDisplay');
-        productList.innerHTML = products.map((product, index) => `
-            <div class="d-flex justify-content-between align-items-center border p-2 mb-2">
-                <span>${product.name} - Rp. ${product.price}</span>
-                <div>
-                    <button class="btn btn-warning btn-sm mr-2" onclick="editProduct(${index})">Edit</button>
-                    <button class="btn btn-danger btn-sm" onclick="deleteProduct(${index})">Hapus</button>
-                </div>
-            </div>
-        `).join('');
-    }
-
-    function editProduct(index) {
-        const product = products[index];
-        document.getElementById('productName').value = product.name;
-        document.getElementById('productPrice').value = product.price;
-        deleteProduct(index);
-    }
-
-    function deleteProduct(index) {
-        products.splice(index, 1);
-        renderProductList();
-    }
-
-    // Fungsi CRUD Kategori
-    document.getElementById('categoryForm').addEventListener('submit', function (e) {
-        e.preventDefault();
-        const category = document.getElementById('categoryName').value;
-        if (category) {
-            categories.push(category);
-            renderCategoryList();
-            document.getElementById('categoryForm').reset();
-        }
-    });
-
-    function renderCategoryList() {
-        const categoryList = document.getElementById('categoryListDisplay');
-        categoryList.innerHTML = categories.map((category, index) => `
-            <div class="d-flex justify-content-between align-items-center border p-2 mb-2">
-                <span>${category}</span>
-                <button class="btn btn-danger btn-sm" onclick="deleteCategory(${index})">Hapus</button>
-            </div>
-        `).join('');
-    }
-
-    function deleteCategory(index) {
-        categories.splice(index, 1);
-        renderCategoryList();
-    }
-
-    // Fungsi CRUD Suplier
-    document.getElementById('supplierForm').addEventListener('submit', function (e) {
-        e.preventDefault();
-        const name = document.getElementById('supplierName').value;
-        const contact = document.getElementById('supplierContact').value;
-        if (name && contact) {
-            suppliers.push({ name, contact });
-            renderSupplierList();
-            document.getElementById('supplierForm').reset();
-        }
-    });
-
-    function renderSupplierList() {
-        const supplierList = document.getElementById('supplierListDisplay');
-        supplierList.innerHTML = suppliers.map((supplier, index) => `
-            <div class="d-flex justify-content-between align-items-center border p-2 mb-2">
-                <span>${supplier.name} (${supplier.contact})</span>
-                <button class="btn btn-danger btn-sm" onclick="deleteSupplier(${index})">Hapus</button>
-            </div>
-        `).join('');
-    }
-
-    function deleteSupplier(index) {
-        suppliers.splice(index, 1);
-        renderSupplierList();
-    }
-
-    // Fungsi CRUD Stok
-    document.getElementById('stockForm').addEventListener('submit', function (e) {
-        e.preventDefault();
-        const product = document.getElementById('stockProduct').value;
-        const quantity = document.getElementById('stockQuantity').value;
-        if (product && quantity) {
-            stocks.push({ product, quantity });
-            renderStockList();
-            document.getElementById('stockForm').reset();
-        }
-    });
-
-    function renderStockList() {
-        const stockList = document.getElementById('stockListDisplay');
-        stockList.innerHTML = stocks.map((stock, index) => `
-            <div class="d-flex justify-content-between align-items-center border p-2 mb-2">
-                <span>${stock.product} - ${stock.quantity}</span>
-                <button class="btn btn-danger btn-sm" onclick="deleteStock(${index})">Hapus</button>
-            </div>
-        `).join('');
-    }
-
-    function deleteStock(index) {
-        stocks.splice(index, 1);
-        renderStockList();
-    }
-
-    // Fungsi CRUD Satuan
-    document.getElementById('unitForm').addEventListener('submit', function (e) {
-        e.preventDefault();
-        const unit = document.getElementById('unitName').value;
-        if (unit) {
-            units.push(unit);
-            renderUnitList();
-            document.getElementById('unitForm').reset();
-        }
-    });
-
-    function renderUnitList() {
-        const unitList = document.getElementById('unitListDisplay');
-        unitList.innerHTML = units.map((unit, index) => `
-            <div class="d-flex justify-content-between align-items-center border p-2 mb-2">
-                <span>${unit}</span>
-                <button class="btn btn-danger btn-sm" onclick="deleteUnit(${index})">Hapus</button>
-            </div>
-        `).join('');
-    }
-
-    function deleteUnit(index) {
-        units.splice(index, 1);
-        renderUnitList();
-    }
-
-    // Populate dropdown untuk stok
-    function populateSelectOptions() {
-        const productSelect = document.getElementById('stockProduct');
-        productSelect.innerHTML = '<option value="">Pilih Produk</option>' + products.map(product => `
-            <option value="${product.name}">${product.name}</option>
-        `).join('');
-    }
-
-    // Render ulang dropdown setelah tambah produk
-    document.getElementById('productForm').addEventListener('submit', populateSelectOptions);
-</script>
-
