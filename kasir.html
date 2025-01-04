@@ -3,43 +3,210 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Halaman Kasir</title>
+    <title>Dashboard Admin - Fitur Transaksi</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-    <link rel="stylesheet" href="style.css"> <!-- Gaya tambahan -->
+    <style>
+        .hidden { display: none; }
+        .active { font-weight: bold; color: #007bff; }
+        .notification {
+            background-color: #28a745;
+            color: white;
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+        }
+        .table-container { overflow-x: auto; }
+    </style>
 </head>
 <body>
+    <!-- Navbar -->
     <nav class="navbar navbar-expand-lg navbar-light bg-light">
-        <a class="navbar-brand" href="#">Kasir Dashboard</a>
+        <a class="navbar-brand" href="#">Dashboard</a>
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav ml-auto">
                 <li class="nav-item"><a class="nav-link" href="#">Dashboard</a></li>
-                <li class="nav-item"><a class="nav-link" href="#">Profile</a></li>
-                <li class="nav-item"><a class="nav-link" href="#">Logout</a></li>
+                <li class="nav-item"><a class="nav-link" href="#">Profil</a></li>
+                <li class="nav-item"><a class="nav-link" href="#" onclick="logout()">Logout</a></li>
             </ul>
         </div>
     </nav>
 
+    <!-- Container -->
     <div class="container mt-4">
         <div class="row">
+            <!-- Sidebar -->
             <div class="col-md-3">
-                <div class="list-group">
-                    <a href="#" class="list-group-item list-group-item-action">Orders</a>
-                    <a href="#" class="list-group-item list-group-item-action">Payments</a>
-                    <a href="#" class="list-group-item list-group-item-action">Transactions</a>
+                <div class="list-group" id="menuSidebar">
+                    <a href="#produk" class="list-group-item list-group-item-action" onclick="switchSection('produk', this)">Manajemen Produk</a>
+                    <a href="#kategori" class="list-group-item list-group-item-action" onclick="switchSection('kategori', this)">Manajemen Kategori</a>
+                    <a href="#suplier" class="list-group-item list-group-item-action" onclick="switchSection('suplier', this)">Manajemen Suplier</a>
+                    <a href="#stok" class="list-group-item list-group-item-action" onclick="switchSection('stok', this)">Manajemen Stok</a>
+                    <a href="#satuan" class="list-group-item list-group-item-action" onclick="switchSection('satuan', this)">Manajemen Satuan</a>
+                    <a href="#transaksi" class="list-group-item list-group-item-action" onclick="switchSection('transaksi', this)">Transaksi</a>
                 </div>
             </div>
+
+            <!-- Main Content -->
             <div class="col-md-9">
-                <h1>Selamat Datang, Kasir</h1>
-                <!-- Konten Kasir akan tampil di sini -->
+                <!-- Notifikasi -->
+                <div id="notification" class="notification hidden"></div>
+
+                <!-- Template Halaman CRUD -->
+                <div id="crudContainer"></div>
             </div>
         </div>
     </div>
 
-    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <!-- JavaScript -->
+    <script>
+        const sections = {
+            produk: { title: "Manajemen Produk", columns: ["Nama Produk", "Harga"], fields: ["name", "price"], data: [] },
+            kategori: { title: "Manajemen Kategori", columns: ["Nama Kategori"], fields: ["name"], data: [] },
+            suplier: { title: "Manajemen Suplier", columns: ["Nama Suplier", "Kontak"], fields: ["name", "contact"], data: [] },
+            stok: { title: "Manajemen Stok", columns: ["Produk", "Jumlah"], fields: ["product", "quantity"], data: [] },
+            satuan: { title: "Manajemen Satuan", columns: ["Nama Satuan"], fields: ["name"], data: [] },
+            transaksi: { title: "Transaksi", columns: ["Produk", "Jumlah", "Subtotal"], fields: ["product", "quantity", "subtotal"], data: [] },
+        };
+
+        let editingSection = null;
+
+        document.addEventListener("DOMContentLoaded", () => {
+            Object.keys(sections).forEach(sectionId => {
+                const storedData = localStorage.getItem(sectionId);
+                if (storedData) sections[sectionId].data = JSON.parse(storedData);
+            });
+            switchSection('produk', document.querySelector('#menuSidebar a'));
+        });
+
+        function switchSection(sectionId, element) {
+            editingSection = sectionId;
+            renderCRUDSection(sections[sectionId]);
+            document.querySelectorAll('#menuSidebar a').forEach(menu => menu.classList.remove('active'));
+            element.classList.add('active');
+        }
+
+        function renderCRUDSection(section) {
+            if (editingSection === "transaksi") {
+                renderTransaksiSection();
+                return;
+            }
+
+            document.getElementById("crudContainer").innerHTML = `
+                <h2>${section.title}</h2>
+                <form id="${editingSection}Form" class="mb-4">
+                    ${section.fields.map(field => `
+                        <div class="form-group">
+                            <label for="${field}">${field.charAt(0).toUpperCase() + field.slice(1)}</label>
+                            <input type="text" id="${field}" class="form-control" placeholder="Masukkan ${field}">
+                        </div>`).join('')}
+                    <button type="submit" class="btn btn-primary">Tambah</button>
+                    <button type="reset" class="btn btn-secondary">Reset</button>
+                </form>
+                <div class="table-container">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                ${section.columns.map(column => `<th>${column}</th>`).join('')}
+                                <th>Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${renderTableRows(section.data, section.fields)}
+                        </tbody>
+                    </table>
+                </div>
+            `;
+        }
+
+        function renderTransaksiSection() {
+            const produkOptions = sections.produk.data.map(
+                (product, index) => `<option value="${index}">${product.name} - Rp ${product.price}</option>`
+            ).join('');
+
+            document.getElementById("crudContainer").innerHTML = `
+                <h2>Transaksi</h2>
+                <form id="transaksiForm" class="mb-4">
+                    <div class="form-group">
+                        <label for="product">Produk</label>
+                        <select id="product" class="form-control">
+                            <option value="">Pilih Produk</option>
+                            ${produkOptions}
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="quantity">Jumlah</label>
+                        <input type="number" id="quantity" class="form-control" placeholder="Masukkan jumlah">
+                    </div>
+                    <button type="submit" class="btn btn-primary">Tambah ke Keranjang</button>
+                </form>
+                <div class="table-container">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Produk</th>
+                                <th>Jumlah</th>
+                                <th>Subtotal</th>
+                                <th>Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody id="cartTableBody">
+                            ${renderTableRows(sections.transaksi.data, sections.transaksi.fields)}
+                        </tbody>
+                    </table>
+                </div>
+                <div class="mb-4">
+                    <h4>Total: <span id="totalAmount">Rp 0</span></h4>
+                </div>
+                <div class="form-group">
+                    <label for="payment">Pembayaran</label>
+                    <input type="number" id="payment" class="form-control" placeholder="Masukkan jumlah pembayaran">
+                </div>
+                <button class="btn btn-success" onclick="processPayment()">Proses Pembayaran</button>
+            `;
+
+            document.getElementById("transaksiForm").addEventListener("submit", function (event) {
+                event.preventDefault();
+                addToCart();
+            });
+        }
+
+        function addToCart() {
+            const productIndex = document.getElementById("product").value;
+            const quantity = parseInt(document.getElementById("quantity").value);
+            if (!productIndex || quantity <= 0) return alert("Masukkan produk dan jumlah yang valid!");
+
+            const product = sections.produk.data[productIndex];
+            const subtotal = product.price * quantity;
+            sections.transaksi.data.push({
+                product: product.name,
+                quantity,
+                subtotal,
+            });
+
+            renderTransaksiSection();
+            calculateTotal();
+        }
+
+        function calculateTotal() {
+            const total = sections.transaksi.data.reduce((acc, item) => acc + item.subtotal, 0);
+            document.getElementById("totalAmount").innerText = `Rp ${total}`;
+        }
+
+        function processPayment() {
+            const total = sections.transaksi.data.reduce((acc, item) => acc + item.subtotal, 0);
+            const payment = parseInt(document.getElementById("payment").value);
+            if (payment < total) return alert("Pembayaran tidak cukup!");
+
+            const change = payment - total;
+            alert(`Transaksi berhasil! Kembalian: Rp ${change}`);
+            sections.transaksi.data = [];
+            renderTransaksiSection();
+        }
+    </script>
 </body>
 </html>
