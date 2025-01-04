@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard Admin</title>
+    <title>Dashboard Admin - CRUD</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <style>
         .hidden { display: none; }
@@ -15,6 +15,7 @@
             margin-bottom: 10px;
             border-radius: 5px;
         }
+        .table-container { overflow-x: auto; }
     </style>
 </head>
 <body>
@@ -52,101 +53,118 @@
                 <!-- Notifikasi -->
                 <div id="notification" class="notification hidden"></div>
 
-                <!-- Halaman Produk -->
-                <div id="produkSection" class="hidden">
-                    <h2>Manajemen Produk</h2>
-                    <form id="productForm" class="mb-4">
-                        <div class="form-group">
-                            <label for="productName">Nama Produk</label>
-                            <input type="text" id="productName" class="form-control" placeholder="Masukkan nama produk">
-                        </div>
-                        <div class="form-group">
-                            <label for="productPrice">Harga Produk</label>
-                            <input type="number" id="productPrice" class="form-control" placeholder="Masukkan harga produk">
-                        </div>
-                        <button type="submit" class="btn btn-primary">Tambah Produk</button>
-                        <button type="reset" class="btn btn-secondary">Reset</button>
-                    </form>
-                    <div id="productListDisplay"></div>
-                </div>
-
-                <!-- Halaman Kategori -->
-                <div id="kategoriSection" class="hidden">
-                    <h2>Manajemen Kategori</h2>
-                    <form id="categoryForm" class="mb-4">
-                        <div class="form-group">
-                            <label for="categoryName">Nama Kategori</label>
-                            <input type="text" id="categoryName" class="form-control" placeholder="Masukkan nama kategori">
-                        </div>
-                        <button type="submit" class="btn btn-primary">Tambah Kategori</button>
-                        <button type="reset" class="btn btn-secondary">Reset</button>
-                    </form>
-                    <div id="categoryListDisplay"></div>
-                </div>
-
-                <!-- Halaman Suplier -->
-                <div id="suplierSection" class="hidden">
-                    <h2>Manajemen Suplier</h2>
-                    <form id="supplierForm" class="mb-4">
-                        <div class="form-group">
-                            <label for="supplierName">Nama Suplier</label>
-                            <input type="text" id="supplierName" class="form-control" placeholder="Masukkan nama suplier">
-                        </div>
-                        <div class="form-group">
-                            <label for="supplierContact">Kontak Suplier</label>
-                            <input type="text" id="supplierContact" class="form-control" placeholder="Masukkan kontak suplier">
-                        </div>
-                        <button type="submit" class="btn btn-primary">Tambah Suplier</button>
-                        <button type="reset" class="btn btn-secondary">Reset</button>
-                    </form>
-                    <div id="supplierListDisplay"></div>
-                </div>
-
-                <!-- Halaman Stok -->
-                <div id="stokSection" class="hidden">
-                    <h2>Manajemen Stok</h2>
-                    <form id="stockForm" class="mb-4">
-                        <div class="form-group">
-                            <label for="stockProduct">Produk</label>
-                            <select id="stockProduct" class="form-control"></select>
-                        </div>
-                        <div class="form-group">
-                            <label for="stockQuantity">Jumlah Stok</label>
-                            <input type="number" id="stockQuantity" class="form-control" placeholder="Masukkan jumlah stok">
-                        </div>
-                        <button type="submit" class="btn btn-primary">Tambah Stok</button>
-                        <button type="reset" class="btn btn-secondary">Reset</button>
-                    </form>
-                    <div id="stockListDisplay"></div>
-                </div>
-
-                <!-- Halaman Satuan -->
-                <div id="satuanSection" class="hidden">
-                    <h2>Manajemen Satuan</h2>
-                    <form id="unitForm" class="mb-4">
-                        <div class="form-group">
-                            <label for="unitName">Nama Satuan</label>
-                            <input type="text" id="unitName" class="form-control" placeholder="Masukkan nama satuan">
-                        </div>
-                        <button type="submit" class="btn btn-primary">Tambah Satuan</button>
-                        <button type="reset" class="btn btn-secondary">Reset</button>
-                    </form>
-                    <div id="unitListDisplay"></div>
-                </div>
+                <!-- Template Halaman CRUD -->
+                <div id="crudContainer"></div>
             </div>
         </div>
     </div>
 
     <!-- JavaScript -->
     <script>
+        const sections = {
+            produk: { title: "Manajemen Produk", columns: ["Nama Produk", "Harga"], fields: ["name", "price"], data: [] },
+            kategori: { title: "Manajemen Kategori", columns: ["Nama Kategori"], fields: ["name"], data: [] },
+            suplier: { title: "Manajemen Suplier", columns: ["Nama Suplier", "Kontak"], fields: ["name", "contact"], data: [] },
+            stok: { title: "Manajemen Stok", columns: ["Produk", "Jumlah"], fields: ["product", "quantity"], data: [] },
+            satuan: { title: "Manajemen Satuan", columns: ["Nama Satuan"], fields: ["name"], data: [] },
+        };
+
+        let editingSection = null;
+        let editingIndex = null;
+
         function switchSection(sectionId, element) {
-            const sections = ['produk', 'kategori', 'suplier', 'stok', 'satuan'];
-            sections.forEach(id => document.getElementById(`${id}Section`).classList.add('hidden'));
-            document.getElementById(`${sectionId}Section`).classList.remove('hidden');
+            editingSection = sectionId;
+            const section = sections[sectionId];
+
+            document.getElementById("crudContainer").innerHTML = `
+                <h2>${section.title}</h2>
+                <form id="${sectionId}Form" class="mb-4">
+                    ${section.fields.map(field => `
+                        <div class="form-group">
+                            <label for="${field}">${field.charAt(0).toUpperCase() + field.slice(1)}</label>
+                            <input type="text" id="${field}" class="form-control" placeholder="Masukkan ${field}">
+                        </div>`).join('')}
+                    <button type="submit" class="btn btn-primary">Tambah</button>
+                    <button type="reset" class="btn btn-secondary">Reset</button>
+                </form>
+                <div class="table-container">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                ${section.columns.map(column => `<th>${column}</th>`).join('')}
+                                <th>Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${renderTableRows(section.data, section.fields)}
+                        </tbody>
+                    </table>
+                </div>
+            `;
+
+            // Event listener untuk form
+            document.getElementById(`${sectionId}Form`).addEventListener("submit", function (event) {
+                event.preventDefault();
+                handleFormSubmit(sectionId);
+            });
 
             // Highlight menu aktif
             document.querySelectorAll('#menuSidebar a').forEach(menu => menu.classList.remove('active'));
             element.classList.add('active');
+        }
+
+        function renderTableRows(data, fields) {
+            return data.map((item, index) => `
+                <tr>
+                    <td>${index + 1}</td>
+                    ${fields.map(field => `<td>${item[field]}</td>`).join('')}
+                    <td>
+                        <button class="btn btn-warning btn-sm" onclick="editItem(${index})">Edit</button>
+                        <button class="btn btn-danger btn-sm" onclick="deleteItem(${index})">Hapus</button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function handleFormSubmit(sectionId) {
+            const section = sections[sectionId];
+            const data = {};
+
+            section.fields.forEach(field => {
+                data[field] = document.getElementById(field).value;
+            });
+
+            if (editingIndex !== null) {
+                section.data[editingIndex] = data;
+                editingIndex = null;
+                document.querySelector(`#${sectionId}Form button[type="submit"]`).innerText = "Tambah";
+                showNotification(`${section.title} berhasil diperbarui!`);
+            } else {
+                section.data.push(data);
+                showNotification(`${section.title} berhasil ditambahkan!`);
+            }
+
+            switchSection(sectionId, document.querySelector(`#menuSidebar a[href="#${sectionId}"]`));
+        }
+
+        function editItem(index) {
+            const section = sections[editingSection];
+            const item = section.data[index];
+            editingIndex = index;
+
+            section.fields.forEach(field => {
+                document.getElementById(field).value = item[field];
+            });
+
+            document.querySelector(`#${editingSection}Form button[type="submit"]`).innerText = "Perbarui";
+        }
+
+        function deleteItem(index) {
+            const section = sections[editingSection];
+            section.data.splice(index, 1);
+            showNotification(`${section.title} berhasil dihapus!`);
+            switchSection(editingSection, document.querySelector(`#menuSidebar a[href="#${editingSection}"]`));
         }
 
         function showNotification(message) {
@@ -159,6 +177,7 @@
         // Default ke halaman produk
         switchSection('produk', document.querySelector('#menuSidebar a'));
     </script>
+
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
