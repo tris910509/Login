@@ -1,4 +1,4 @@
-// Local Storage Helpers
+// Helpers for LocalStorage
 function loadFromLocalStorage(key) {
     return JSON.parse(localStorage.getItem(key)) || [];
 }
@@ -7,27 +7,31 @@ function saveToLocalStorage(key, data) {
     localStorage.setItem(key, JSON.stringify(data));
 }
 
-function showAlert(message, type) {
+function showAlert(message, type, target = "loginAlert") {
     const alertBox = document.createElement("div");
     alertBox.className = `alert alert-${type} mt-3`;
     alertBox.innerText = message;
-    document.getElementById("loginAlert")?.appendChild(alertBox);
+    const targetElement = document.getElementById(target);
+    targetElement.innerHTML = ""; // Clear previous alerts
+    targetElement.appendChild(alertBox);
     setTimeout(() => alertBox.remove(), 3000);
 }
 
 // Login System
-const users = loadFromLocalStorage("users");
-if (!users.some((user) => user.role === "admin")) {
-    saveToLocalStorage("users", [
-        { username: "admin", password: "1234", role: "admin" },
-        ...users,
-    ]);
+const defaultUsers = [
+    { username: "admin", password: "admin123", role: "admin" },
+    { username: "kasir", password: "kasir123", role: "kasir" },
+    { username: "operator", password: "operator123", role: "operator" },
+];
+if (!localStorage.getItem("users")) {
+    saveToLocalStorage("users", defaultUsers);
 }
 
 document.getElementById("loginForm")?.addEventListener("submit", (e) => {
     e.preventDefault();
     const username = document.getElementById("username").value.trim();
     const password = document.getElementById("password").value;
+    const users = loadFromLocalStorage("users");
     const user = users.find(
         (user) => user.username === username && user.password === password
     );
@@ -45,7 +49,7 @@ function logout() {
     location.href = "index.html";
 }
 
-// Dashboard Content
+// Dashboard
 document.addEventListener("DOMContentLoaded", () => {
     const currentUser = JSON.parse(localStorage.getItem("currentUser"));
     if (currentUser) {
@@ -66,7 +70,7 @@ function loadDashboardContent(role) {
     }
 }
 
-// CRUD Functions (Admin Example)
+// Admin Functions
 function manageUsers() {
     const users = loadFromLocalStorage("users");
     renderUserManagement(users);
@@ -78,56 +82,81 @@ function manageUsers() {
         const role = document.getElementById("newRole").value;
 
         if (users.some((u) => u.username === username)) {
-            showAlert("Username sudah ada!", "danger");
+            showAlert("Username sudah ada!", "danger", "dashboardContent");
             return;
         }
 
         users.push({ username, password, role });
         saveToLocalStorage("users", users);
         renderUserManagement(users);
-        logActivity(`Admin menambahkan pengguna: ${username}`);
+        showAlert("Pengguna berhasil ditambahkan!", "success", "dashboardContent");
     });
 }
 
 function renderUserManagement(users) {
-    // Pagination & Table Render Logic Here
+    const userRows = users
+        .map(
+            (user, index) => `
+            <tr>
+                <td>${index + 1}</td>
+                <td>${user.username}</td>
+                <td>${user.role}</td>
+                <td>
+                    <button class="btn btn-warning btn-sm" onclick="editUser(${index})">Edit</button>
+                    <button class="btn btn-danger btn-sm" onclick="deleteUser(${index})">Hapus</button>
+                </td>
+            </tr>`
+        )
+        .join("");
+
+    document.getElementById("dashboardContent").innerHTML = `
+        <h2>Manajemen Pengguna</h2>
+        <form id="addUserForm" class="mb-3">
+            <div class="input-group">
+                <input type="text" id="newUsername" class="form-control" placeholder="Username" required>
+                <input type="password" id="newPassword" class="form-control" placeholder="Password" required>
+                <select id="newRole" class="form-select">
+                    <option value="admin">Admin</option>
+                    <option value="kasir">Kasir</option>
+                    <option value="operator">Operator</option>
+                </select>
+                <button type="submit" class="btn btn-primary">Tambah</button>
+            </div>
+        </form>
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>No</th>
+                    <th>Username</th>
+                    <th>Role</th>
+                    <th>Aksi</th>
+                </tr>
+            </thead>
+            <tbody>${userRows}</tbody>
+        </table>
+    `;
 }
 
-// Log Activity
-function logActivity(action) {
-    const logs = loadFromLocalStorage("logs");
-    const currentUser = JSON.parse(localStorage.getItem("currentUser"));
-    logs.push({
-        action,
-        user: currentUser.username,
-        role: currentUser.role,
-        date: new Date().toLocaleString(),
-    });
-    saveToLocalStorage("logs", logs);
+function editUser(index) {
+    const users = loadFromLocalStorage("users");
+    const user = users[index];
+    const newUsername = prompt("Masukkan username baru:", user.username);
+    const newRole = prompt("Masukkan role baru (admin/kasir/operator):", user.role);
+
+    if (newUsername && newRole) {
+        users[index] = { ...user, username: newUsername, role: newRole };
+        saveToLocalStorage("users", users);
+        manageUsers();
+        showAlert("Pengguna berhasil diperbarui!", "success", "dashboardContent");
+    }
 }
 
-// Backup & Restore Data
-function backupData() {
-    const data = {
-        users: loadFromLocalStorage("users"),
-        transactions: loadFromLocalStorage("transactions"),
-        logs: loadFromLocalStorage("logs"),
-    };
-    const blob = new Blob([JSON.stringify(data, null, 2)], {
-        type: "application/json",
-    });
-    const link = document.createElement("a");
-    link.href = URL.createObjectURL(blob);
-    link.download = "backup.json";
-    link.click();
-}
-
-function restoreData(file) {
-    const reader = new FileReader();
-    reader.onload = (e) => {
-        const data = JSON.parse(e.target.result);
-        Object.keys(data).forEach((key) => saveToLocalStorage(key, data[key]));
-        location.reload();
-    };
-    reader.readAsText(file);
+function deleteUser(index) {
+    const users = loadFromLocalStorage("users");
+    if (confirm("Yakin ingin menghapus pengguna ini?")) {
+        users.splice(index, 1);
+        saveToLocalStorage("users", users);
+        manageUsers();
+        showAlert("Pengguna berhasil dihapus!", "success", "dashboardContent");
+    }
 }
