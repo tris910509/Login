@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard Admin - CRUD Lanjutan</title>
+    <title>Dashboard Admin - Transaksi & Laporan</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <style>
         .hidden { display: none; }
@@ -45,6 +45,8 @@
                     <a href="#suplier" class="list-group-item list-group-item-action" onclick="switchSection('suplier', this)">Manajemen Suplier</a>
                     <a href="#stok" class="list-group-item list-group-item-action" onclick="switchSection('stok', this)">Manajemen Stok</a>
                     <a href="#satuan" class="list-group-item list-group-item-action" onclick="switchSection('satuan', this)">Manajemen Satuan</a>
+                    <a href="#transaksi" class="list-group-item list-group-item-action" onclick="switchSection('transaksi', this)">Transaksi</a>
+                    <a href="#laporan" class="list-group-item list-group-item-action" onclick="switchSection('laporan', this)">Laporan</a>
                 </div>
             </div>
 
@@ -62,19 +64,15 @@
     <!-- JavaScript -->
     <script>
         const sections = {
-            produk: { title: "Manajemen Produk", columns: ["Nama Produk", "Harga"], fields: ["name", "price"], data: [] },
+            produk: { title: "Manajemen Produk", columns: ["Nama Produk", "Harga", "Stok"], fields: ["name", "price", "stock"], data: [] },
             kategori: { title: "Manajemen Kategori", columns: ["Nama Kategori"], fields: ["name"], data: [] },
             suplier: { title: "Manajemen Suplier", columns: ["Nama Suplier", "Kontak"], fields: ["name", "contact"], data: [] },
             stok: { title: "Manajemen Stok", columns: ["Produk", "Jumlah"], fields: ["product", "quantity"], data: [] },
             satuan: { title: "Manajemen Satuan", columns: ["Nama Satuan"], fields: ["name"], data: [] },
+            transaksi: { title: "Transaksi", columns: ["Produk", "Jumlah", "Subtotal"], fields: ["product", "quantity", "subtotal"], data: [] },
+            laporan: { title: "Laporan Penjualan", columns: ["No", "Tanggal", "Total", "Detail"], data: [] }
         };
 
-        let editingSection = null;
-        let editingIndex = null;
-        const itemsPerPage = 5;
-        let currentPage = 1;
-
-        // Load data dari local storage saat halaman dimuat
         document.addEventListener("DOMContentLoaded", () => {
             Object.keys(sections).forEach(sectionId => {
                 const storedData = localStorage.getItem(sectionId);
@@ -84,24 +82,23 @@
         });
 
         function switchSection(sectionId, element) {
-            editingSection = sectionId;
             const section = sections[sectionId];
-            currentPage = 1;
-
-            renderCRUDSection(section);
             document.querySelectorAll('#menuSidebar a').forEach(menu => menu.classList.remove('active'));
             element.classList.add('active');
+
+            if (sectionId === "transaksi") {
+                renderTransaksiSection();
+            } else if (sectionId === "laporan") {
+                renderLaporanSection();
+            } else {
+                renderCRUDSection(section);
+            }
         }
 
         function renderCRUDSection(section) {
             document.getElementById("crudContainer").innerHTML = `
                 <h2>${section.title}</h2>
-                <div class="mb-3 d-flex justify-content-between">
-                    <input type="text" id="searchInput" class="form-control mr-2" placeholder="Cari data..." style="max-width: 300px;">
-                    <button class="btn btn-warning" onclick="resetData()">Reset Data</button>
-                    <button class="btn btn-success ml-2" onclick="exportToCSV()">Export ke CSV</button>
-                </div>
-                <form id="${editingSection}Form" class="mb-4">
+                <form id="${section.fields.join('')}Form" class="mb-4">
                     ${section.fields.map(field => `
                         <div class="form-group">
                             <label for="${field}">${field.charAt(0).toUpperCase() + field.slice(1)}</label>
@@ -124,76 +121,215 @@
                         </tbody>
                     </table>
                 </div>
-                <div class="d-flex justify-content-between">
-                    <button class="btn btn-light" onclick="prevPage()">Sebelumnya</button>
-                    <button class="btn btn-light" onclick="nextPage()">Berikutnya</button>
-                </div>
             `;
-
-            document.getElementById(`${editingSection}Form`).addEventListener("submit", function (event) {
-                event.preventDefault();
-                handleFormSubmit(editingSection);
-            });
-
-            document.getElementById("searchInput").addEventListener("input", handleSearch);
         }
 
         function renderTableRows(data, fields) {
-            const start = (currentPage - 1) * itemsPerPage;
-            const end = start + itemsPerPage;
-            const filteredData = data.slice(start, end);
-
-            return filteredData.map((item, index) => `
+            return data.map((item, index) => `
                 <tr>
-                    <td>${start + index + 1}</td>
+                    <td>${index + 1}</td>
                     ${fields.map(field => `<td>${item[field]}</td>`).join('')}
                     <td>
-                        <button class="btn btn-warning btn-sm" onclick="editItem(${start + index})">Edit</button>
-                        <button class="btn btn-danger btn-sm" onclick="deleteItem(${start + index})">Hapus</button>
+                        <button class="btn btn-warning btn-sm" onclick="editItem('${fields.join('')}', ${index})">Edit</button>
+                        <button class="btn btn-danger btn-sm" onclick="deleteItem('${fields.join('')}', ${index})">Hapus</button>
                     </td>
                 </tr>
             `).join('');
         }
 
-        function prevPage() {
-            if (currentPage > 1) currentPage--;
-            renderCRUDSection(sections[editingSection]);
-        }
-
-        function nextPage() {
-            const section = sections[editingSection];
-            if (currentPage * itemsPerPage < section.data.length) currentPage++;
-            renderCRUDSection(section);
-        }
-
-        function handleSearch(event) {
-            const query = event.target.value.toLowerCase();
-            const section = sections[editingSection];
-            section.filteredData = section.data.filter(item => {
-                return Object.values(item).some(value => value.toLowerCase().includes(query));
+        function editItem(sectionId, index) {
+            const item = sections[sectionId].data[index];
+            sections[sectionId].fields.forEach(field => {
+                document.getElementById(field).value = item[field];
             });
-            renderCRUDSection(section);
+            document.querySelector(`#${sectionId}Form`).onsubmit = (event) => {
+                event.preventDefault();
+                updateItem(sectionId, index);
+            };
         }
 
-        function resetData() {
-            localStorage.removeItem(editingSection);
-            sections[editingSection].data = [];
-            renderCRUDSection(sections[editingSection]);
+        function updateItem(sectionId, index) {
+            const updatedData = {};
+            sections[sectionId].fields.forEach(field => {
+                updatedData[field] = document.getElementById(field).value;
+            });
+            sections[sectionId].data[index] = updatedData;
+            localStorage.setItem(sectionId, JSON.stringify(sections[sectionId].data));
+            showNotification('Data berhasil diperbarui!', 'success');
+            switchSection(sectionId, document.querySelector(`#menuSidebar a[href="#${sectionId}"]`));
         }
 
-        function exportToCSV() {
-            const section = sections[editingSection];
-            const csvContent = [
-                section.columns.join(","),
-                ...section.data.map(item => Object.values(item).join(","))
-            ].join("\n");
+        function deleteItem(sectionId, index) {
+            sections[sectionId].data.splice(index, 1);
+            localStorage.setItem(sectionId, JSON.stringify(sections[sectionId].data));
+            showNotification('Data berhasil dihapus!', 'danger');
+            switchSection(sectionId, document.querySelector(`#menuSidebar a[href="#${sectionId}"]`));
+        }
 
-            const blob = new Blob([csvContent], { type: "text/csv" });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement("a");
-            a.href = url;
-            a.download = `${editingSection}.csv`;
-            a.click();
+        function renderTransaksiSection() {
+            const produkOptions = sections.produk.data.map((product, index) => 
+                `<option value="${index}">${product.name} - Rp ${product.price} (${product.stock} stok)</option>`
+            ).join('');
+
+            document.getElementById("crudContainer").innerHTML = `
+                <h2>Transaksi</h2>
+                <form id="transaksiForm" class="mb-4">
+                    <div class="form-group">
+                        <label for="product">Produk</label>
+                        <select id="product" class="form-control">
+                            <option value="">Pilih Produk</option>
+                            ${produkOptions}
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="quantity">Jumlah</label>
+                        <input type="number" id="quantity" class="form-control" placeholder="Masukkan jumlah">
+                    </div>
+                    <button type="submit" class="btn btn-primary">Tambah ke Keranjang</button>
+                </form>
+                <div class="table-container">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Produk</th>
+                                <th>Jumlah</th>
+                                <th>Subtotal</th>
+                                <th>Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody id="cartTableBody">
+                            ${renderCartRows(sections.transaksi.data)}
+                        </tbody>
+                    </table>
+                </div>
+                <div class="mb-4">
+                    <h4>Total: <span id="totalAmount">Rp 0</span></h4>
+                </div>
+                <div class="form-group">
+                    <label for="payment">Pembayaran</label>
+                    <input type="number" id="payment" class="form-control" placeholder="Masukkan jumlah pembayaran">
+                </div>
+                <button class="btn btn-success" onclick="processPayment()">Proses Pembayaran</button>
+            `;
+
+            document.getElementById("transaksiForm").addEventListener("submit", function (event) {
+                event.preventDefault();
+                addToCart();
+            });
+
+            calculateTotal();
+        }
+
+        function addToCart() {
+            const productIndex = document.getElementById("product").value;
+            const quantity = parseInt(document.getElementById("quantity").value);
+            const product = sections.produk.data[productIndex];
+
+            if (!productIndex || quantity <= 0) return alert("Masukkan produk dan jumlah yang valid!");
+            if (quantity > product.stock) return alert("Jumlah melebihi stok!");
+
+            const subtotal = product.price * quantity;
+            product.stock -= quantity;
+            sections.transaksi.data.push({ product: product.name, quantity, subtotal });
+            localStorage.setItem("transaksi", JSON.stringify(sections.transaksi.data));
+            renderTransaksiSection();
+        }
+
+        function renderCartRows(cart) {
+            return cart.map((item, index) => `
+                <tr>
+                    <td>${index + 1}</td>
+                    <td>${item.product}</td>
+                    <td>${item.quantity}</td>
+                    <td>Rp ${item.subtotal}</td>
+                    <td>
+                        <button class="btn btn-warning btn-sm" onclick="editCartItem(${index})">Edit</button>
+                        <button class="btn btn-danger btn-sm" onclick="deleteCartItem(${index})">Hapus</button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function editCartItem(index) {
+            const item = sections.transaksi.data[index];
+            document.getElementById("product").value = sections.produk.data.findIndex(product => product.name === item.product);
+            document.getElementById("quantity").value = item.quantity;
+            deleteCartItem(index);
+        }
+
+        function deleteCartItem(index) {
+            const productIndex = sections.produk.data.findIndex(product => product.name === sections.transaksi.data[index].product);
+            sections.produk.data[productIndex].stock += sections.transaksi.data[index].quantity;
+            sections.transaksi.data.splice(index, 1);
+            localStorage.setItem("transaksi", JSON.stringify(sections.transaksi.data));
+            renderTransaksiSection();
+        }
+
+        function calculateTotal() {
+            const total = sections.transaksi.data.reduce((acc, item) => acc + item.subtotal, 0);
+            document.getElementById("totalAmount").innerText = `Rp ${total}`;
+        }
+
+        function processPayment() {
+            const total = sections.transaksi.data.reduce((acc, item) => acc + item.subtotal, 0);
+            const payment = parseInt(document.getElementById("payment").value);
+            if (payment < total) return alert("Pembayaran tidak cukup!");
+
+            const change = payment - total;
+            alert(`Transaksi berhasil! Kembalian: Rp ${change}`);
+
+            sections.laporan.data.push({
+                date: new Date().toLocaleString(),
+                total,
+                items: [...sections.transaksi.data],
+            });
+            localStorage.setItem("laporan", JSON.stringify(sections.laporan.data));
+
+            sections.transaksi.data = [];
+            localStorage.setItem("transaksi", JSON.stringify([]));
+            renderTransaksiSection();
+        }
+
+        function renderLaporanSection() {
+            const rows = sections.laporan.data.map((laporan, index) => `
+                <tr>
+                    <td>${index + 1}</td>
+                    <td>${laporan.date}</td>
+                    <td>Rp ${laporan.total}</td>
+                    <td>${laporan.items.map(item => `${item.product} (${item.quantity})`).join(", ")}</td>
+                </tr>
+            `).join('');
+
+            document.getElementById("crudContainer").innerHTML = `
+                <h2>Laporan Penjualan</h2>
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Tanggal</th>
+                            <th>Total</th>
+                            <th>Detail</th>
+                        </tr>
+                    </thead>
+                    <tbody>${rows}</tbody>
+                </table>
+            `;
+        }
+
+        function showNotification(message, type) {
+            const notification = document.getElementById("notification");
+            notification.classList.remove('hidden', 'alert-success', 'alert-danger');
+            notification.classList.add(`alert-${type}`);
+            notification.textContent = message;
+            setTimeout(() => {
+                notification.classList.add('hidden');
+            }, 3000);
+        }
+
+        function logout() {
+            alert("Logout berhasil!");
+            // Redirect to login or homepage
         }
     </script>
 </body>
