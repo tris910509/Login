@@ -1,20 +1,20 @@
-// Simulasi data pengguna yang login
+// Data Pengguna
 const currentUser = {
   id: 'USR001',
   name: 'John Doe',
-  role: 'Admin' // Role dapat diubah untuk pengujian (Admin, Kasir, Other)
+  role: 'Admin' // Role dapat diubah untuk pengujian: Admin, Kasir, Other
 };
 
 // Hak akses menu berdasarkan ID pengguna
 const menuAccess = {
   USR001: [
     { name: 'Home', icon: 'fas fa-home', link: '#home' },
-    { name: 'User Management', icon: 'fas fa-users', link: '#user' },
+    { name: 'User Management', icon: 'fas fa-users', link: '#users' },
     { name: 'Pelanggan', icon: 'fas fa-user-friends', link: '#pelanggan' },
     { name: 'Supplier', icon: 'fas fa-truck', link: '#supplier' },
     { name: 'Kategori', icon: 'fas fa-tags', link: '#kategori' },
     { name: 'Item', icon: 'fas fa-box', link: '#item' },
-    { name: 'Produk', icon: 'fas fa-cubes', link: '#produk' },
+    { name: 'Produk', icon: 'fas fa-cube', link: '#produk' },
     { name: 'Transaksi', icon: 'fas fa-money-check-alt', link: '#transaksi' },
     { name: 'Laporan', icon: 'fas fa-file-alt', link: '#laporan' }
   ],
@@ -28,57 +28,163 @@ const menuAccess = {
   ]
 };
 
-// Konten dummy untuk setiap halaman
-const pageContent = {
-  Home: '<p>Selamat datang di halaman Home.</p>',
-  User: '<p>Kelola data pengguna di halaman ini.</p>',
-  Pelanggan: '<p>Kelola data pelanggan di halaman ini.</p>',
-  Supplier: '<p>Kelola data supplier di halaman ini.</p>',
-  Kategori: '<p>Kelola kategori produk di halaman ini.</p>',
-  Item: '<p>Kelola data item di halaman ini.</p>',
-  Produk: '<p>Kelola data produk di halaman ini.</p>',
-  Transaksi: '<p>Kelola transaksi di halaman ini.</p>',
-  Laporan: '<p>Lihat laporan di halaman ini.</p>'
+// Konten untuk setiap menu
+const menuContent = {
+  home: `
+    <div class="card">
+      <div class="card-body">
+        <h5 class="card-title">Welcome</h5>
+        <p>Selamat datang di dashboard!</p>
+      </div>
+    </div>
+  `,
+  users: `
+    <h3>Manajemen User</h3>
+    <form id="userForm">
+      <div class="form-group">
+        <label for="userName">Nama User</label>
+        <input type="text" id="userName" class="form-control" placeholder="Masukkan nama user">
+      </div>
+      <div class="form-group">
+        <label for="userRole">Peran</label>
+        <select id="userRole" class="form-control">
+          <option>Admin</option>
+          <option>Kasir</option>
+          <option>Other</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="userEmail">Email</label>
+        <input type="email" id="userEmail" class="form-control" placeholder="Masukkan email user">
+      </div>
+      <button type="submit" class="btn btn-primary">Simpan</button>
+    </form>
+  `,
+  pelanggan: `
+    <h3>Data Pelanggan</h3>
+    <form id="pelangganForm">
+      <div class="form-group">
+        <label for="pelangganName">Nama Pelanggan</label>
+        <input type="text" id="pelangganName" class="form-control" placeholder="Masukkan nama pelanggan">
+      </div>
+      <div class="form-group">
+        <label for="pelangganContact">Kontak</label>
+        <input type="text" id="pelangganContact" class="form-control" placeholder="Masukkan kontak">
+      </div>
+      <button type="submit" class="btn btn-primary">Simpan</button>
+    </form>
+  `,
+  supplier: `
+    <h3>Data Supplier</h3>
+    <form id="supplierForm">
+      <div class="form-group">
+        <label for="supplierName">Nama Supplier</label>
+        <input type="text" id="supplierName" class="form-control" placeholder="Masukkan nama supplier">
+      </div>
+      <div class="form-group">
+        <label for="supplierContact">Kontak</label>
+        <input type="text" id="supplierContact" class="form-control" placeholder="Masukkan kontak">
+      </div>
+      <button type="submit" class="btn btn-primary">Simpan</button>
+    </form>
+  `,
+  kategori: `
+    <h3>Kategori Produk</h3>
+    <form id="kategoriForm">
+      <div class="form-group">
+        <label for="kategoriName">Nama Kategori</label>
+        <input type="text" id="kategoriName" class="form-control" placeholder="Masukkan kategori">
+      </div>
+      <button type="submit" class="btn btn-primary">Simpan</button>
+    </form>
+  `,
+  item: `
+    <h3>Data Item</h3>
+    <form id="itemForm">
+      <div class="form-group">
+        <label for="itemName">Nama Item</label>
+        <input type="text" id="itemName" class="form-control" placeholder="Masukkan nama item">
+      </div>
+      <div class="form-group">
+        <label for="itemStock">Stok</label>
+        <input type="number" id="itemStock" class="form-control" placeholder="Masukkan stok">
+      </div>
+      <button type="submit" class="btn btn-primary">Simpan</button>
+    </form>
+  `,
+  produk: `
+    <h3>Data Produk</h3>
+    <form id="produkForm">
+      <div class="form-group">
+        <label for="produkName">Nama Produk</label>
+        <input type="text" id="produkName" class="form-control" placeholder="Masukkan nama produk">
+      </div>
+      <div class="form-group">
+        <label for="produkPrice">Harga</label>
+        <input type="number" id="produkPrice" class="form-control" placeholder="Masukkan harga">
+      </div>
+      <button type="submit" class="btn btn-primary">Simpan</button>
+    </form>
+  `,
+  transaksi: `
+    <h3>Data Transaksi</h3>
+    <form id="transaksiForm">
+      <div class="form-group">
+        <label for="transaksiID">ID Transaksi</label>
+        <input type="text" id="transaksiID" class="form-control" placeholder="Masukkan ID transaksi">
+      </div>
+      <div class="form-group">
+        <label for="transaksiTotal">Total</label>
+        <input type="number" id="transaksiTotal" class="form-control" placeholder="Masukkan total transaksi">
+      </div>
+      <button type="submit" class="btn btn-primary">Simpan</button>
+    </form>
+  `,
+  laporan: `
+    <h3>Laporan</h3>
+    <p>Fitur laporan akan menampilkan ringkasan data transaksi.</p>
+  `
 };
 
-// Fungsi untuk memuat menu di sidebar
+// Fungsi untuk memuat menu
 const loadMenuByUserID = (userID) => {
   const navbarList = document.getElementById('navbarList');
   navbarList.innerHTML = '';
 
   if (menuAccess[userID]) {
-    const menus = menuAccess[userID];
-    menus.forEach(menu => {
+    menuAccess[userID].forEach(menu => {
       const li = document.createElement('li');
+      li.classList.add('nav-item');
       li.innerHTML = `
-        <a href="${menu.link}" onclick="navigateTo('${menu.name}')">
+        <a href="#" class="nav-link" data-menu="${menu.link.replace('#', '')}">
           <i class="${menu.icon}"></i> ${menu.name}
         </a>
       `;
       navbarList.appendChild(li);
     });
-  } else {
-    navbarList.innerHTML = '<li><p>Tidak ada menu tersedia untuk Anda.</p></li>';
+
+    // Event Listener untuk setiap menu
+    document.querySelectorAll('#navbarList .nav-link').forEach(link => {
+      link.addEventListener('click', (e) => {
+        e.preventDefault();
+        const menu = e.target.dataset.menu;
+        loadContent(menu);
+      });
+    });
   }
 };
 
-// Fungsi untuk menavigasi ke halaman tertentu
-const navigateTo = (page) => {
+// Fungsi untuk memuat konten
+const loadContent = (menu) => {
   const pageTitle = document.getElementById('pageTitle');
-  const dashboardCards = document.getElementById('dashboardCards');
+  const pageContent = document.getElementById('pageContent');
 
-  pageTitle.textContent = page;
-  dashboardCards.innerHTML = `
-    <div class="col-md-12">
-      <div class="card">
-        <div class="card-body">
-          ${pageContent[page]}
-        </div>
-      </div>
-    </div>
-  `;
+  pageTitle.innerText = menu.charAt(0).toUpperCase() + menu.slice(1);
+  pageContent.innerHTML = menuContent[menu] || `<p>Menu ${menu} tidak ditemukan.</p>`;
 };
 
 // Inisialisasi
-loadMenuByUserID(currentUser.id);
-navigateTo('Home'); // Default halaman pertama
+document.addEventListener('DOMContentLoaded', () => {
+  loadMenuByUserID(currentUser.id);
+  loadContent('home'); // Default ke halaman Home
+});
