@@ -146,6 +146,124 @@ const menuContent = {
   `
 };
 
+// Konten untuk halaman Home
+menuContent.home = `
+  <div class="row">
+    <!-- Profil -->
+    <div class="col-md-4">
+      <div class="card">
+        <div class="card-body text-center">
+          <i class="fas fa-user-circle fa-4x mb-3"></i>
+          <h5 class="card-title">${currentUser.name}</h5>
+          <p class="card-text">Peran: ${currentUser.role}</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Statistik -->
+    <div class="col-md-8">
+      <div class="row">
+        <div class="col-md-6">
+          <div class="card text-center">
+            <div class="card-body">
+              <h5 class="card-title">Pelanggan</h5>
+              <p class="card-text" id="statPelanggan">0</p>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="card text-center">
+            <div class="card-body">
+              <h5 class="card-title">Supplier</h5>
+              <p class="card-text" id="statSupplier">0</p>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="card text-center">
+            <div class="card-body">
+              <h5 class="card-title">Kategori</h5>
+              <p class="card-text" id="statKategori">0</p>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="card text-center">
+            <div class="card-body">
+              <h5 class="card-title">Produk</h5>
+              <p class="card-text" id="statProduk">0</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Chart Laporan -->
+  <div class="row mt-4">
+    <div class="col-md-12">
+      <div class="card">
+        <div class="card-body">
+          <h5 class="card-title">Laporan Transaksi</h5>
+          <canvas id="chartLaporan"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+`;
+
+// Data Dummy untuk Statistik
+const dummyStats = {
+  pelanggan: 120,
+  supplier: 50,
+  kategori: 20,
+  produk: 150,
+  laporan: [12, 15, 20, 25, 30, 50, 70] // Data transaksi bulanan
+};
+
+// Fungsi untuk memperbarui statistik
+const updateStats = () => {
+  document.getElementById('statPelanggan').innerText = dummyStats.pelanggan;
+  document.getElementById('statSupplier').innerText = dummyStats.supplier;
+  document.getElementById('statKategori').innerText = dummyStats.kategori;
+  document.getElementById('statProduk').innerText = dummyStats.produk;
+};
+
+// Fungsi untuk membuat chart laporan transaksi
+const loadChartLaporan = () => {
+  const ctx = document.getElementById('chartLaporan').getContext('2d');
+  new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul'],
+      datasets: [{
+        label: 'Jumlah Transaksi',
+        data: dummyStats.laporan,
+        borderColor: 'rgba(75, 192, 192, 1)',
+        backgroundColor: 'rgba(75, 192, 192, 0.2)',
+        borderWidth: 2
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: {
+          position: 'top'
+        }
+      }
+    }
+  });
+};
+
+// Panggil fungsi pada saat halaman Home dimuat
+document.addEventListener('DOMContentLoaded', () => {
+  if (currentUser.role === 'Admin' || currentUser.role === 'Kasir') {
+    updateStats();
+    loadChartLaporan();
+  }
+});
+
+
 // Fungsi untuk memuat menu
 const loadMenuByUserID = (userID) => {
   const navbarList = document.getElementById('navbarList');
