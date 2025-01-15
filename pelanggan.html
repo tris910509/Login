@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manajemen Pelanggan</title>
+    <link href="assets/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container mt-5">
+        <h2>Manajemen Pelanggan</h2>
+        <button class="btn btn-primary mb-3" data-bs-toggle="modal" data-bs-target="#addPelangganModal">Tambah Pelanggan</button>
+
+        <table class="table table-bordered" id="pelangganTable">
+            <thead>
+                <tr>
+                    <th>Nama Pelanggan</th>
+                    <th>Jenis Pelanggan</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Data pelanggan akan ditampilkan di sini -->
+            </tbody>
+        </table>
+
+        <!-- Modal Tambah Pelanggan -->
+        <div class="modal fade" id="addPelangganModal" tabindex="-1" aria-labelledby="addPelangganModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="addPelangganModalLabel">Tambah Pelanggan</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form id="addPelangganForm">
+                            <div class="mb-3">
+                                <label for="namaPelanggan" class="form-label">Nama Pelanggan</label>
+                                <input type="text" class="form-control" id="namaPelanggan" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="jenisPelanggan" class="form-label">Jenis Pelanggan</label>
+                                <select class="form-select" id="jenisPelanggan" required>
+                                    <option value="umum">Umum</option>
+                                    <option value="pelSem">PelSem</option>
+                                    <option value="pelMem">PelMem</option>
+                                </select>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Simpan</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="assets/js/bootstrap.bundle.min.js"></script>
+    <script src="assets/js/app.js"></script>
+</body>
+</html>
