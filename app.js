@@ -4,6 +4,26 @@ document.addEventListener('DOMContentLoaded', function () {
     const welcomeMessage = document.getElementById('welcomeMessage');
     const statsContainer = document.getElementById('statsContainer');
 
+    <script>
+    document.getElementById('loginForm').addEventListener('submit', function (event) {
+        event.preventDefault();
+
+        let username = document.getElementById('username').value;
+        let password = document.getElementById('password').value;
+
+        // Simulasi autentikasi pengguna
+        let users = JSON.parse(localStorage.getItem('users')) || [];
+        let user = users.find(u => u.username === username && u.password === password);
+
+        if (user) {
+            localStorage.setItem('loggedInUser', JSON.stringify(user));
+            window.location.href = 'dashboard.html'; // Redirect ke halaman Dashboard
+        } else {
+            Swal.fire('Error', 'Username atau password salah!', 'error');
+        }
+    });
+</script>
+
     // Dummy Data
     const roleAccess = {
         Admin: [
