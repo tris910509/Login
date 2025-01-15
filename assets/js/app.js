@@ -19,6 +19,24 @@ document.getElementById('loginForm').addEventListener('submit', function(event) 
 });
 
 
+// Mengambil data pelanggan dari localStorage
+function loadPelanggan() {
+    const pelanggan = JSON.parse(localStorage.getItem('pelanggan')) || [];
+    const pelangganSelect = document.getElementById('selectPelanggan');
+    pelangganSelect.innerHTML = ""; // Kosongkan dropdown
+
+    pelanggan.forEach((item, index) => {
+        const option = document.createElement('option');
+        option.value = index;
+        option.textContent = `${item.nama} (${item.jenis})`;
+        pelangganSelect.appendChild(option);
+    });
+}
+
+// Memanggil loadPelanggan ketika halaman dimuat
+document.addEventListener('DOMContentLoaded', loadPelanggan);
+
+
 // Menambahkan pengguna baru
 document.getElementById('addUserForm').addEventListener('submit', function(event) {
     event.preventDefault();
@@ -143,6 +161,33 @@ document.addEventListener('DOMContentLoaded', renderPelanggan);
 
 
 //supplier
+// Menyimpan transaksi dengan pelanggan yang dipilih
+document.getElementById('addTransactionForm').addEventListener('submit', function(event) {
+    event.preventDefault();
+
+    const selectedPelangganIndex = document.getElementById('selectPelanggan').value;
+    const pelanggan = JSON.parse(localStorage.getItem('pelanggan')) || [];
+    const pelangganDipilih = pelanggan[selectedPelangganIndex];
+
+    if (!pelangganDipilih) {
+        Swal.fire('Error', 'Pelanggan tidak valid!', 'error');
+        return;
+    }
+
+    const transaksi = {
+        pelanggan: pelangganDipilih,
+        total: document.getElementById('totalAmount').value
+    };
+
+    const transactions = JSON.parse(localStorage.getItem('transactions')) || [];
+    transactions.push(transaksi);
+
+    localStorage.setItem('transactions', JSON.stringify(transactions));
+
+    Swal.fire('Berhasil', 'Transaksi berhasil disimpan!', 'success');
+});
+
+
 // Menambahkan supplier baru
 document.getElementById('addSupplierForm').addEventListener('submit', function(event) {
     event.preventDefault();
@@ -246,4 +291,12 @@ function confirmPayment(transactionId) {
     });
 }
 
+
+//Menambahkan Validasi untuk Input Tanggal dan Format Lainnya
+const tanggal = document.getElementById('tanggalTransaksi').value;
+const tanggalRegex = /^\d{4}-\d{2}-\d{2}$/; // Format yyyy-mm-dd
+if (!tanggal.match(tanggalRegex)) {
+    Swal.fire('Error', 'Format tanggal tidak valid!', 'error');
+    return;
+}
 
