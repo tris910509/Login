@@ -1,10 +1,10 @@
 document.addEventListener('DOMContentLoaded', function () {
-    const loginForm = document.getElementById('loginForm');
     const logoutButton = document.getElementById('logoutButton');
     const menuList = document.getElementById('menuList');
     const welcomeMessage = document.getElementById('welcomeMessage');
+    const statsContainer = document.getElementById('statsContainer');
 
-    // Dummy Data for Role-Based Access
+    // Dummy Data
     const roleAccess = {
         Admin: [
             { name: 'Users', icon: 'fas fa-users', url: 'users.html' },
@@ -28,26 +28,59 @@ document.addEventListener('DOMContentLoaded', function () {
         ],
     };
 
-    // Login Functionality
-    if (loginForm) {
-        loginForm.addEventListener('submit', function (e) {
-            e.preventDefault();
-            const username = document.getElementById('username').value;
-            const password = document.getElementById('password').value;
-            const role = document.getElementById('role').value;
+    const statsData = {
+        Admin: [
+            { title: 'Total Users', count: 120, icon: 'fas fa-users', color: 'bg-primary' },
+            { title: 'Total Transaksi', count: 340, icon: 'fas fa-shopping-cart', color: 'bg-success' },
+            { title: 'Total Pendapatan', count: 'Rp 15,000,000', icon: 'fas fa-wallet', color: 'bg-warning' },
+        ],
+        Kasir: [
+            { title: 'Transaksi Hari Ini', count: 30, icon: 'fas fa-shopping-cart', color: 'bg-success' },
+            { title: 'Pendapatan Hari Ini', count: 'Rp 500,000', icon: 'fas fa-wallet', color: 'bg-warning' },
+        ],
+        Pelanggan: [
+            { title: 'Total Pembelian', count: 5, icon: 'fas fa-shopping-bag', color: 'bg-info' },
+        ],
+    };
 
-            if (username && password && role) {
-                localStorage.setItem('loggedIn', JSON.stringify({ username, role }));
-                Swal.fire('Login Berhasil', 'Selamat datang di aplikasi!', 'success').then(() => {
-                    window.location.href = 'dashboard.html';
-                });
-            } else {
-                Swal.fire('Error', 'Harap isi semua kolom!', 'error');
-            }
+    // Load Data Based on Role
+    const userData = JSON.parse(localStorage.getItem('loggedIn'));
+    if (!userData) {
+        Swal.fire('Akses Ditolak', 'Silakan login terlebih dahulu.', 'error').then(() => {
+            window.location.href = 'index.html';
+        });
+    } else {
+        const { username, role } = userData;
+        welcomeMessage.innerText = `Selamat Datang, ${username} (${role})`;
+
+        // Generate Menu
+        const menuItems = roleAccess[role] || [];
+        menuItems.forEach(item => {
+            const li = document.createElement('li');
+            li.className = 'nav-item';
+            li.innerHTML = `<a class="nav-link" href="${item.url}"><i class="${item.icon}"></i> ${item.name}</a>`;
+            menuList.appendChild(li);
+        });
+
+        // Generate Statistics
+        const stats = statsData[role] || [];
+        stats.forEach(stat => {
+            const col = document.createElement('div');
+            col.className = 'col-md-4';
+            col.innerHTML = `
+                <div class="card text-white ${stat.color} mb-3">
+                    <div class="card-body">
+                        <h5 class="card-title">${stat.title}</h5>
+                        <p class="card-text">${stat.count}</p>
+                        <i class="${stat.icon} fa-3x"></i>
+                    </div>
+                </div>
+            `;
+            statsContainer.appendChild(col);
         });
     }
 
-    // Logout Functionality
+    // Logout
     if (logoutButton) {
         logoutButton.addEventListener('click', function () {
             localStorage.removeItem('loggedIn');
@@ -57,24 +90,36 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    // Dynamically Load Menu Based on Role
-    if (menuList && welcomeMessage) {
-        const userData = JSON.parse(localStorage.getItem('loggedIn'));
-        if (!userData) {
-            Swal.fire('Akses Ditolak', 'Silakan login terlebih dahulu.', 'error').then(() => {
-                window.location.href = 'index.html';
-            });
-        } else {
-            const { username, role } = userData;
-            welcomeMessage.innerText = `Selamat Datang, ${username} (${role})`;
+    // Charts
+    const salesChart = document.getElementById('salesChart');
+    const customerChart = document.getElementById('customerChart');
+    if (salesChart && customerChart) {
+        const ctx1 = salesChart.getContext('2d');
+        new Chart(ctx1, {
+            type: 'bar',
+            data: {
+                labels: ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni'],
+                datasets: [{
+                    label: 'Pendapatan (Rp)',
+                    data: [1200000, 1500000, 1800000, 2000000, 2500000, 3000000],
+                    backgroundColor: 'rgba(54, 162, 235, 0.7)',
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    borderWidth: 1
+                }]
+            },
+        });
 
-            const menuItems = roleAccess[role] || [];
-            menuItems.forEach(item => {
-                const li = document.createElement('li');
-                li.className = 'nav-item';
-                li.innerHTML = `<a class="nav-link" href="${item.url}"><i class="${item.icon}"></i> ${item.name}</a>`;
-                menuList.appendChild(li);
-            });
-        }
+        const ctx2 = customerChart.getContext('2d');
+        new Chart(ctx2, {
+            type: 'doughnut',
+            data: {
+                labels: ['Pelanggan Baru', 'Pelanggan Lama'],
+                datasets: [{
+                    data: [40, 60],
+                    backgroundColor: ['rgba(75, 192, 192, 0.7)', 'rgba(255, 99, 132, 0.7)'],
+                    borderColor: ['rgba(75, 192, 192, 1)', 'rgba(255, 99, 132, 1)'],
+                }]
+            },
+        });
     }
 });
