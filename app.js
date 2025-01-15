@@ -4,7 +4,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const welcomeMessage = document.getElementById('welcomeMessage');
     const statsContainer = document.getElementById('statsContainer');
 
-    <script>
+    
     document.getElementById('loginForm').addEventListener('submit', function (event) {
         event.preventDefault();
 
@@ -22,7 +22,7 @@ document.addEventListener('DOMContentLoaded', function () {
             Swal.fire('Error', 'Username atau password salah!', 'error');
         }
     });
-</script>
+
 
     // Dummy Data
     const roleAccess = {
