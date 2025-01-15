@@ -64,6 +64,163 @@ function deleteUser(index) {
 // Panggil fungsi renderUsers saat halaman dimuat
 document.addEventListener('DOMContentLoaded', renderUsers);
 
+//elanggan 
+// Menambahkan pelanggan baru
+document.getElementById('addPelangganForm').addEventListener('submit', function(event) {
+    event.preventDefault();
+    const namaPelanggan = document.getElementById('namaPelanggan').value;
+    const jenisPelanggan = document.getElementById('jenisPelanggan').value;
+
+    const pelanggan = JSON.parse(localStorage.getItem('pelanggan')) || [];
+    pelanggan.push({ nama: namaPelanggan, jenis: jenisPelanggan });
+
+    localStorage.setItem('pelanggan', JSON.stringify(pelanggan));
+
+    Swal.fire('Berhasil', 'Pelanggan berhasil ditambahkan!', 'success');
+    renderPelanggan(); // Menampilkan daftar pelanggan
+    $('#addPelangganModal').modal('hide'); // Menutup modal
+});
+
+// Render daftar pelanggan
+function renderPelanggan() {
+    const pelanggan = JSON.parse(localStorage.getItem('pelanggan')) || [];
+    const tableBody = document.querySelector("#pelangganTable tbody");
+    tableBody.innerHTML = ""; // Kosongkan tabel
+
+    pelanggan.forEach((item, index) => {
+        const row = `
+            <tr>
+                <td>${item.nama}</td>
+                <td>${item.jenis}</td>
+                <td><button class="btn btn-danger" onclick="deletePelanggan(${index})">Hapus</button></td>
+            </tr>
+        `;
+        tableBody.insertAdjacentHTML('beforeend', row);
+    });
+}
+
+// Menghapus pelanggan
+function deletePelanggan(index) {
+    const pelanggan = JSON.parse(localStorage.getItem('pelanggan')) || [];
+    pelanggan.splice(index, 1);
+    localStorage.setItem('pelanggan', JSON.stringify(pelanggan));
+    renderPelanggan();
+}
+
+// Menambahkan pelanggan baru dengan validasi
+document.getElementById('addPelangganForm').addEventListener('submit', function(event) {
+    event.preventDefault();
+    
+    const namaPelanggan = document.getElementById('namaPelanggan').value.trim();
+    const jenisPelanggan = document.getElementById('jenisPelanggan').value;
+    
+    // Validasi input
+    if (namaPelanggan === "") {
+        Swal.fire('Error', 'Nama pelanggan tidak boleh kosong!', 'error');
+        return;
+    }
+
+    if (jenisPelanggan === "") {
+        Swal.fire('Error', 'Jenis pelanggan harus dipilih!', 'error');
+        return;
+    }
+
+    // Simpan data ke localStorage
+    const pelanggan = JSON.parse(localStorage.getItem('pelanggan')) || [];
+    pelanggan.push({ nama: namaPelanggan, jenis: jenisPelanggan });
+
+    localStorage.setItem('pelanggan', JSON.stringify(pelanggan));
+
+    Swal.fire('Berhasil', 'Pelanggan berhasil ditambahkan!', 'success');
+    renderPelanggan(); // Menampilkan daftar pelanggan
+    $('#addPelangganModal').modal('hide'); // Menutup modal
+});
+
+
+// Panggil fungsi renderPelanggan saat halaman dimuat
+document.addEventListener('DOMContentLoaded', renderPelanggan);
+
+
+
+//supplier
+// Menambahkan supplier baru
+document.getElementById('addSupplierForm').addEventListener('submit', function(event) {
+    event.preventDefault();
+    const namaSupplier = document.getElementById('namaSupplier').value;
+    const jenisSupplier = document.getElementById('jenisSupplier').value;
+
+    const suppliers = JSON.parse(localStorage.getItem('suppliers')) || [];
+    suppliers.push({ nama: namaSupplier, jenis: jenisSupplier });
+
+    localStorage.setItem('suppliers', JSON.stringify(suppliers));
+
+    Swal.fire('Berhasil', 'Supplier berhasil ditambahkan!', 'success');
+    renderSuppliers(); // Menampilkan daftar supplier
+    $('#addSupplierModal').modal('hide'); // Menutup modal
+});
+
+// Render daftar supplier
+function renderSuppliers() {
+    const suppliers = JSON.parse(localStorage.getItem('suppliers')) || [];
+    const tableBody = document.querySelector("#supplierTable tbody");
+    tableBody.innerHTML = ""; // Kosongkan tabel
+
+    suppliers.forEach((item, index) => {
+        const row = `
+            <tr>
+                <td>${item.nama}</td>
+                <td>${item.jenis}</td>
+                <td><button class="btn btn-danger" onclick="deleteSupplier(${index})">Hapus</button></td>
+            </tr>
+        `;
+        tableBody.insertAdjacentHTML('beforeend', row);
+    });
+}
+
+// Menghapus supplier
+function deleteSupplier(index) {
+    const suppliers = JSON.parse(localStorage.getItem('suppliers')) || [];
+    suppliers.splice(index, 1);
+    localStorage.setItem('suppliers', JSON.stringify(suppliers));
+    renderSuppliers();
+}
+
+
+// Menambahkan supplier baru dengan validasi
+document.getElementById('addSupplierForm').addEventListener('submit', function(event) {
+    event.preventDefault();
+    
+    const namaSupplier = document.getElementById('namaSupplier').value.trim();
+    const jenisSupplier = document.getElementById('jenisSupplier').value;
+    
+    // Validasi input
+    if (namaSupplier === "") {
+        Swal.fire('Error', 'Nama supplier tidak boleh kosong!', 'error');
+        return;
+    }
+
+    if (jenisSupplier === "") {
+        Swal.fire('Error', 'Jenis supplier harus dipilih!', 'error');
+        return;
+    }
+
+    // Simpan data ke localStorage
+    const suppliers = JSON.parse(localStorage.getItem('suppliers')) || [];
+    suppliers.push({ nama: namaSupplier, jenis: jenisSupplier });
+
+    localStorage.setItem('suppliers', JSON.stringify(suppliers));
+
+    Swal.fire('Berhasil', 'Supplier berhasil ditambahkan!', 'success');
+    renderSuppliers(); // Menampilkan daftar supplier
+    $('#addSupplierModal').modal('hide'); // Menutup modal
+});
+
+// Panggil fungsi renderSuppliers saat halaman dimuat
+document.addEventListener('DOMContentLoaded', renderSuppliers);
+
+
+// kategori
+
 
 
 // Konfirmasi Pembayaran
