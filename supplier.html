@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manajemen Supplier</title>
+    <link href="assets/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container mt-5">
+        <h2>Manajemen Supplier</h2>
+        <button class="btn btn-primary mb-3" data-bs-toggle="modal" data-bs-target="#addSupplierModal">Tambah Supplier</button>
+
+        <table class="table table-bordered" id="supplierTable">
+            <thead>
+                <tr>
+                    <th>Nama Supplier</th>
+                    <th>Jenis Supplier</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Data supplier akan ditampilkan di sini -->
+            </tbody>
+        </table>
+
+        <!-- Modal Tambah Supplier -->
+        <div class="modal fade" id="addSupplierModal" tabindex="-1" aria-labelledby="addSupplierModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="addSupplierModalLabel">Tambah Supplier</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form id="addSupplierForm">
+                            <div class="mb-3">
+                                <label for="namaSupplier" class="form-label">Nama Supplier</label>
+                                <input type="text" class="form-control" id="namaSupplier" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="jenisSupplier" class="form-label">Jenis Supplier</label>
+                                <select class="form-select" id="jenisSupplier" required>
+                                    <option value="umum">Umum</option>
+                                    <option value="spMem">SpMem</option>
+                                </select>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Simpan</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="assets/js/bootstrap.bundle.min.js"></script>
+    <script src="assets/js/app.js"></script>
+</body>
+</html>
