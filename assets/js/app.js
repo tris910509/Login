@@ -63,3 +63,30 @@ function deleteUser(index) {
 
 // Panggil fungsi renderUsers saat halaman dimuat
 document.addEventListener('DOMContentLoaded', renderUsers);
+
+
+
+// Konfirmasi Pembayaran
+function confirmPayment(transactionId) {
+    Swal.fire({
+        title: 'Konfirmasi Pembayaran',
+        text: 'Apakah Anda yakin ingin membayar transaksi ini?',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Bayar',
+        cancelButtonText: 'Batal'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            // Update status pembayaran transaksi
+            const transactions = JSON.parse(localStorage.getItem('transactions')) || [];
+            const transaction = transactions.find(t => t.id === transactionId);
+            if (transaction) {
+                transaction.status = 'Paid';
+                localStorage.setItem('transactions', JSON.stringify(transactions));
+                Swal.fire('Pembayaran Berhasil', 'Pembayaran telah diproses.', 'success');
+            }
+        }
+    });
+}
+
+
